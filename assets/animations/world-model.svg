@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 90" role="img">
+<rect width="330" height="90" fill="#FCFAF8"/>
+<g fill="none" stroke="#C9C5C0" stroke-width="1">
+<ellipse cx="165" cy="45" rx="112" ry="34"/><ellipse cx="165" cy="45" rx="78" ry="24"/><ellipse cx="165" cy="45" rx="42" ry="13"/>
+</g>
+<g fill="#C6292E"><circle cx="91" cy="43" r="2.3"/><circle cx="119" cy="27" r="2.3"/><circle cx="148" cy="54" r="2.3"/><circle cx="177" cy="33" r="2.3"/><circle cx="205" cy="58" r="2.3"/><circle cx="235" cy="39" r="2.3"/></g>
+<circle cx="165" cy="45" r="4" fill="#C6292E" opacity=".18"><animate attributeName="r" values="3;18;3" dur="2.8s" repeatCount="indefinite"/><animate attributeName="opacity" values=".35;0;.35" dur="2.8s" repeatCount="indefinite"/></circle>
+<circle cx="91" cy="43" r="2.3" fill="#C6292E"><animate attributeName="cy" values="43;37;43" dur="1.8s" repeatCount="indefinite"/></circle>
+<circle cx="177" cy="33" r="2.3" fill="#C6292E"><animate attributeName="cy" values="33;40;33" dur="2.1s" repeatCount="indefinite"/></circle>
+<path d="M91 43 Q130 5 177 33 Q205 50 235 39" fill="none" stroke="#C6292E" stroke-width="1" stroke-dasharray="2 5" opacity=".7"><animate attributeName="stroke-dashoffset" from="30" to="0" dur="2s" repeatCount="indefinite"/></path>
+</svg>
