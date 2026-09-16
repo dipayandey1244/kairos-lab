@@ -504,17 +504,401 @@ function renderResearchView() {
 }
 
 function renderProjectsView() {
+  const activeTab = state.projectFilter || 'ALL';
+
+  const projects = [
+    {
+      id: 'timesfm',
+      category: 'Time Series Foundation Models',
+      title: 'TimesFM: Universal Zero-Shot Time Series Forecasting',
+      tagline: 'Pre-trained decoder-only transformer for zero-shot spatio-temporal prediction across energy, weather, and transport.',
+      image: '/images/ai-financial-services.jpg',
+      badge: 'NeurIPS 2025 Spotlight',
+      type: 'ts-canvas',
+      desc: 'TimesFM leverages sub-series patch tokenization and LOTSA 27B observation pre-training to predict arbitrary future horizons without dataset-specific fine-tuning.',
+      metrics: [
+        { label: 'Pre-training Corpus', val: '100 Billion Points' },
+        { label: 'Zero-Shot MSE Drop', val: '-24.6%' },
+        { label: 'Max Context Window', val: '2048 Steps' }
+      ]
+    },
+    {
+      id: 'worldpriors',
+      category: 'World Models',
+      title: 'WorldPriors: Sample-Efficient Latent World Models for Robotic Navigation',
+      tagline: 'Learning predictive neural representations of real-world physics to enable zero-shot quadruped navigation in unstructured terrain.',
+      image: '/images/quadruped-spot-robot.jpg',
+      badge: 'CoRL 2026 Paper',
+      type: 'wm-canvas',
+      desc: 'By hallucinating future camera observations and terrain rollouts inside a compact latent space, robots plan trajectories 100x faster than model-free RL.',
+      metrics: [
+        { label: 'Sample Efficiency', val: '100x Faster' },
+        { label: 'Real-World Success', val: '94.2%' },
+        { label: 'Planning Latency', val: '< 15ms' }
+      ]
+    },
+    {
+      id: 'vla',
+      category: 'Vision-Language-Action',
+      title: 'OpenVLA: Generalizable Embodied Policy Execution',
+      tagline: 'Bridging multi-modal vision-language understanding directly with 7-DOF robotic arm manipulation.',
+      image: '/images/robotic-arm-hero.jpg',
+      badge: 'ICRA 2025 Spotlight',
+      type: 'vla-interactive',
+      desc: 'OpenVLA tokenizes natural language commands alongside 60fps camera streams into continuous joint velocity vectors, enabling generalizable tabletop manipulation.',
+      metrics: [
+        { label: 'Unseen Object Transfer', val: '88.5%' },
+        { label: 'Language Tasks', val: '120+ Mandates' },
+        { label: 'Control Frequency', val: '50 Hz' }
+      ]
+    },
+    {
+      id: 'graphnet',
+      category: 'Spatio-Temporal Graphs',
+      title: 'GraphTS: Dynamic Attention over Urban Infrastructure Networks',
+      tagline: 'Spatial graph neural networks combined with temporal transformers for city-scale power and transport grids.',
+      image: '/images/autonomous-agents-architecture.jpg',
+      badge: 'IEEE TPAMI 2026',
+      type: 'graph-canvas',
+      desc: 'Models cross-sensor correlations across thousands of physical grid nodes, automatically detecting structural anomalies and predicting energy flow bottlenecks.',
+      metrics: [
+        { label: 'Grid Nodes', val: '10,000+ Sensors' },
+        { label: 'Anomaly Recall', val: '98.4%' },
+        { label: 'Horizon', val: '72 Hours' }
+      ]
+    }
+  ];
+
+  const filteredProjects = activeTab === 'ALL' 
+    ? projects 
+    : projects.filter(p => p.category.toUpperCase().includes(activeTab));
+
   return `
-    <section class="container" style="padding: 64px 0;">
-      <div class="dash-eyebrow">PROJECTS</div>
-      <h1 class="hero-h1">Active Research Projects</h1>
-      <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); padding: 40px; border-radius: var(--radius-md); margin-top: 24px;">
-        <h3 style="font-family: var(--font-serif); font-size: 26px; margin-bottom: 8px;">World Models for Real-World Robotic Navigation</h3>
-        <p style="font-size: 14px; color: var(--text-secondary);">Exploring sample-efficient world model representations for robotic navigation in complex terrain.</p>
+    <section class="container" style="padding: 48px 0 80px 0;">
+      <!-- Projects Header -->
+      <div class="ts-breadcrumbs">
+        <span class="ts-crumb-link" onclick="window.navigateTo('/')">Home</span>
+        <span class="ts-crumb-sep">/</span>
+        <span class="ts-crumb-active">Interactive Projects</span>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <div class="dash-eyebrow">LAB RESEARCH SHOWCASE</div>
+        <h1 class="hero-h1">Interactive Research Projects</h1>
+        <p class="hero-p" style="max-width: 800px;">
+          Explore our open-source research systems, interactive visual simulators, and real-world deployment models.
+        </p>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="projects-filter-bar">
+        <button class="filter-tab-btn ${activeTab === 'ALL' ? 'active' : ''}" onclick="window.filterProjects('ALL')">All Projects (4)</button>
+        <button class="filter-tab-btn ${activeTab === 'TIME' ? 'active' : ''}" onclick="window.filterProjects('TIME')">Time Series Foundation Models</button>
+        <button class="filter-tab-btn ${activeTab === 'WORLD' ? 'active' : ''}" onclick="window.filterProjects('WORLD')">World Models & Robotics</button>
+        <button class="filter-tab-btn ${activeTab === 'VISION' ? 'active' : ''}" onclick="window.filterProjects('VISION')">Vision-Language-Action</button>
+      </div>
+
+      <!-- Projects Grid -->
+      <div class="projects-vertical-list">
+        ${filteredProjects.map(project => renderProjectCard(project)).join('')}
       </div>
     </section>
   `;
 }
+
+function renderProjectCard(p) {
+  const activeVlaStep = state.vlaActiveStep || 1;
+
+  return `
+    <div class="project-card-container">
+      <div class="project-info-col">
+        <div style="display: flex; gap: 8px; margin-bottom: 12px; align-items: center;">
+          <span class="venue-badge">${p.badge}</span>
+          <span class="ts-tag-pill">${p.category}</span>
+        </div>
+
+        <h2 class="project-card-title">${p.title}</h2>
+        <div class="project-card-tagline">${p.tagline}</div>
+        <p class="project-card-desc">${p.desc}</p>
+
+        <div class="project-metrics-row">
+          ${p.metrics.map(m => `
+            <div class="metric-box">
+              <div class="metric-val">${m.val}</div>
+              <div class="metric-lbl">${m.label}</div>
+            </div>
+          `).join('')}
+        </div>
+
+        <div class="project-actions-row">
+          ${p.id === 'timesfm' ? `
+            <button class="btn-paper-red" onclick="window.navigateTo('/research/time-series')">Explore Deep Dive & Simulator →</button>
+          ` : `
+            <button class="btn-paper-red" onclick="alert('Opening interactive demo for ${p.title}...')">⚡ Launch Live Playground</button>
+          `}
+          <a href="https://github.com" target="_blank" class="btn-paper-outline">💻 View Code (GitHub)</a>
+        </div>
+      </div>
+
+      <div class="project-interactive-col">
+        ${p.type === 'ts-canvas' ? `
+          <div class="project-canvas-box">
+            <div class="canvas-header-tag">
+              <span class="dot-live"></span> LIVE PATCH TOKENIZATION STREAM
+            </div>
+            <canvas id="project-canvas-timesfm" width="540" height="280"></canvas>
+            <div class="canvas-caption">
+              Visualizing zero-shot continuous time series patch tokenization & multi-head temporal attention.
+            </div>
+          </div>
+        ` : ''}
+
+        ${p.type === 'wm-canvas' ? `
+          <div class="project-canvas-box">
+            <div class="canvas-header-tag">
+              <span class="dot-live"></span> LATENT WORLD MODEL HALLUCINATION
+            </div>
+            <canvas id="project-canvas-worldpriors" width="540" height="280"></canvas>
+            <div class="canvas-caption">
+              Hallucinating future 2D terrain observations & trajectory rollouts in compact latent space.
+            </div>
+          </div>
+        ` : ''}
+
+        ${p.type === 'vla-interactive' ? `
+          <div class="project-vla-box">
+            <div class="canvas-header-tag">
+              <span class="dot-live"></span> VLA EMBODIED EXECUTION PIPELINE
+            </div>
+
+            <div class="vla-stepper-nav">
+              <button class="vla-step-pill ${activeVlaStep === 1 ? 'active' : ''}" onclick="window.setVlaStep(1)">1. Prompt</button>
+              <button class="vla-step-pill ${activeVlaStep === 2 ? 'active' : ''}" onclick="window.setVlaStep(2)">2. Vision</button>
+              <button class="vla-step-pill ${activeVlaStep === 3 ? 'active' : ''}" onclick="window.setVlaStep(3)">3. Attention</button>
+              <button class="vla-step-pill ${activeVlaStep === 4 ? 'active' : ''}" onclick="window.setVlaStep(4)">4. Joint Action</button>
+            </div>
+
+            <div class="vla-step-content">
+              ${activeVlaStep === 1 ? `
+                <div class="vla-demo-box">
+                  <div class="vla-label">User Natural Language Prompt:</div>
+                  <div class="vla-prompt-text">"Pick up the red power module and place it onto the upper test bench."</div>
+                  <div class="vla-tokens-row">
+                    <span class="vla-tok">[BOS]</span><span class="vla-tok">Pick</span><span class="vla-tok">up</span><span class="vla-tok">red</span><span class="vla-tok">module</span><span class="vla-tok">[EOS]</span>
+                  </div>
+                </div>
+              ` : ''}
+
+              ${activeVlaStep === 2 ? `
+                <div class="vla-demo-box">
+                  <div class="vla-label">Multi-View Wrist & Overhead Camera Stream (224x224):</div>
+                  <div class="vla-vision-grid">
+                    <img src="${p.image}" class="vla-cam-img" alt="Arm View" />
+                    <div class="vla-vision-patches">Patch Tokens: 256 @ 14x14</div>
+                  </div>
+                </div>
+              ` : ''}
+
+              ${activeVlaStep === 3 ? `
+                <div class="vla-demo-box">
+                  <div class="vla-label">Cross-Modal Transformer Attention Heatmap:</div>
+                  <div style="font-family: var(--font-mono); font-size: 11px; color: var(--accent-red); background: #17191C; padding: 12px; border-radius: 4px;">
+                    Attn(Q_text, K_image) = Softmax( Q K^T / √d ) <br/>
+                    Peak Attention Weight: 0.941 -> Object "red module" @ (x: 142, y: 88)
+                  </div>
+                </div>
+              ` : ''}
+
+              ${activeVlaStep === 4 ? `
+                <div class="vla-demo-box">
+                  <div class="vla-label">Target 7-DOF Joint Action Velocity Vector a_t ∈ ℝ^7:</div>
+                  <div class="vla-vector-grid">
+                    <span>Δx: +0.04m</span><span>Δy: -0.12m</span><span>Δz: -0.02m</span>
+                    <span>Roll: +1.2°</span><span>Pitch: -0.4°</span><span>Yaw: +3.1°</span>
+                    <span style="color: var(--accent-red); font-weight: 700;">Gripper: 0.85 (CLOSE)</span>
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        ` : ''}
+
+        ${p.type === 'graph-canvas' ? `
+          <div class="project-canvas-box">
+            <div class="canvas-header-tag">
+              <span class="dot-live"></span> SPATIO-TEMPORAL GRAPH ATTENTION
+            </div>
+            <canvas id="project-canvas-graphnet" width="540" height="280"></canvas>
+            <div class="canvas-caption">
+              Dynamic cross-node attention weights updating over 16 urban grid sensor nodes.
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+}
+
+window.filterProjects = (cat) => {
+  state.projectFilter = cat;
+  renderApp();
+};
+
+window.setVlaStep = (step) => {
+  state.vlaActiveStep = step;
+  renderApp();
+};
+
+function initProjectsCanvasSimulators() {
+  // 1. TimesFM Project Canvas
+  const tsCanvas = document.getElementById('project-canvas-timesfm');
+  if (tsCanvas) {
+    const ctx = tsCanvas.getContext('2d');
+    let tOffset = 0;
+
+    function drawTs() {
+      ctx.clearRect(0, 0, tsCanvas.width, tsCanvas.height);
+      ctx.fillStyle = '#0B0E10';
+      ctx.fillRect(0, 0, tsCanvas.width, tsCanvas.height);
+
+      // Draw grid
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      for (let x = 0; x < tsCanvas.width; x += 30) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, tsCanvas.height); ctx.stroke();
+      }
+
+      ctx.beginPath();
+      ctx.strokeStyle = '#4A90E2';
+      ctx.lineWidth = 2;
+      for (let i = 0; i < 140; i++) {
+        const x = i * 4;
+        const y = tsCanvas.height / 2 + Math.sin((i + tOffset) * 0.1) * 35 + Math.cos((i + tOffset) * 0.04) * 20;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // Forecast curve
+      ctx.beginPath();
+      ctx.strokeStyle = '#B52E32';
+      ctx.lineWidth = 2.5;
+      for (let i = 100; i < 140; i++) {
+        const x = i * 4;
+        const y = tsCanvas.height / 2 + Math.sin((i + tOffset) * 0.1) * 35 + Math.cos((i + tOffset) * 0.04) * 20;
+        if (i === 100) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      tOffset += 0.3;
+      requestAnimationFrame(drawTs);
+    }
+    drawTs();
+  }
+
+  // 2. WorldPriors Quadruped Canvas
+  const wmCanvas = document.getElementById('project-canvas-worldpriors');
+  if (wmCanvas) {
+    const ctx = wmCanvas.getContext('2d');
+    let rX = 50;
+    let rY = 140;
+    let rAngle = 0;
+
+    function drawWm() {
+      ctx.clearRect(0, 0, wmCanvas.width, wmCanvas.height);
+      ctx.fillStyle = '#0F1317';
+      ctx.fillRect(0, 0, wmCanvas.width, wmCanvas.height);
+
+      // Draw obstacles
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.beginPath(); ctx.arc(200, 100, 24, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(350, 180, 30, 0, Math.PI * 2); ctx.fill();
+
+      // Predicted Trajectory Path
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = '#00E676';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(rX, rY);
+      ctx.quadraticCurveTo(250, 40, 480, 140);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Robot Body
+      ctx.fillStyle = '#B52E32';
+      ctx.beginPath();
+      ctx.arc(rX, rY, 10, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Imagined Ghost Poses
+      for (let g = 1; g <= 4; g++) {
+        const gx = rX + g * 80;
+        const gy = rY + Math.sin(g * 0.8) * 30;
+        ctx.strokeStyle = 'rgba(0, 230, 118, 0.4)';
+        ctx.beginPath();
+        ctx.arc(gx, gy, 8, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      rX += 0.8;
+      if (rX > wmCanvas.width - 50) rX = 50;
+      requestAnimationFrame(drawWm);
+    }
+    drawWm();
+  }
+
+  // 3. Spatio-Temporal Graph Canvas
+  const graphCanvas = document.getElementById('project-canvas-graphnet');
+  if (graphCanvas) {
+    const ctx = graphCanvas.getContext('2d');
+    let frame = 0;
+
+    const nodes = [];
+    for (let i = 0; i < 14; i++) {
+      const angle = (i / 14) * Math.PI * 2;
+      nodes.push({
+        x: graphCanvas.width / 2 + Math.cos(angle) * 100,
+        y: graphCanvas.height / 2 + Math.sin(angle) * 80,
+        id: i
+      });
+    }
+
+    function drawGraph() {
+      ctx.clearRect(0, 0, graphCanvas.width, graphCanvas.height);
+      ctx.fillStyle = '#0B0E10';
+      ctx.fillRect(0, 0, graphCanvas.width, graphCanvas.height);
+
+      // Draw Attention Edges
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const dist = Math.hypot(nodes[i].x - nodes[j].x, nodes[i].y - nodes[j].y);
+          if (dist < 130) {
+            const alpha = 0.1 + Math.sin((frame + i * j) * 0.05) * 0.15;
+            ctx.strokeStyle = `rgba(181, 46, 50, ${alpha + 0.15})`;
+            ctx.lineWidth = 1 + alpha * 3;
+            ctx.beginPath();
+            ctx.moveTo(nodes[i].x, nodes[i].y);
+            ctx.lineTo(nodes[j].x, nodes[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Draw Nodes
+      nodes.forEach((n, idx) => {
+        ctx.fillStyle = idx % 3 === 0 ? '#B52E32' : '#4A90E2';
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, 6, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      frame++;
+      requestAnimationFrame(drawGraph);
+    }
+    drawGraph();
+  }
+}
+
 
 function renderPublicationsView() {
   return `
