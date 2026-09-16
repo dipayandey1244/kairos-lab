@@ -1,0 +1,18 @@
+{
+  "name": "kairos-editorial-platform",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host --port 5173",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "lucide": "^0.344.0",
+    "marked": "^12.0.0"
+  },
+  "devDependencies": {
+    "vite": "^5.1.4"
+  }
+}
