@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 90" role="img">
+<rect width="330" height="90" fill="#FCFAF8"/>
+<g fill="none" stroke="#D9A1A2" stroke-width="1">
+<path d="M0 55 C25 30 38 70 62 44 S104 22 128 50 S165 72 190 39 S226 20 248 49 S286 69 330 30" opacity=".3"/>
+<path d="M0 52 C25 27 38 67 62 41 S104 19 128 47 S165 69 190 36 S226 17 248 46 S286 66 330 27" stroke="#C6292E" stroke-width="1.5" stroke-dasharray="420">
+<animate attributeName="stroke-dashoffset" from="420" to="0" dur="3.2s" repeatCount="indefinite"/></path>
+<path d="M0 61 C25 36 38 76 62 50 S104 28 128 56 S165 78 190 45 S226 26 248 55 S286 75 330 36" opacity=".2"/>
+<line x1="225" y1="8" x2="225" y2="82" stroke="#C6292E" stroke-dasharray="3 4" opacity=".55"/>
+</g>
+<circle cx="225" cy="48" r="3" fill="#C6292E"><animate attributeName="r" values="2;4;2" dur="1.4s" repeatCount="indefinite"/></circle>
+<text x="232" y="18" font-family="Inter,Arial,sans-serif" font-size="6" letter-spacing="1.5" fill="#68717A">FORECAST</text>
+</svg>
