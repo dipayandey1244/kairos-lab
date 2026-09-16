@@ -59,6 +59,10 @@ function renderApp() {
     ${renderFooter()}
     ${renderDocsModal()}
   `;
+
+  if (state.currentPath === '/research/time-series') {
+    setTimeout(initTimeSeriesCanvasSimulator, 50);
+  }
 }
 
 function renderHeader() {
@@ -99,6 +103,7 @@ function renderRouter() {
   const p = state.currentPath;
 
   if (p === '/' || p === '/home') return renderHomeView();
+  if (p === '/research/time-series') return renderTimeSeriesView();
   if (p.startsWith('/research')) return renderResearchView();
   if (p.startsWith('/projects')) return renderProjectsView();
   if (p === '/publications') return renderPublicationsView();
@@ -186,8 +191,8 @@ function renderResearchPillars() {
       </div>
 
       <div class="pillars-section-grid">
-        <!-- Pillar 01 -->
-        <div class="pillar-item-card" onclick="window.navigateTo('/research')">
+        <!-- Pillar 01: Time Series Models (Deep Dive) -->
+        <div class="pillar-item-card pillar-featured-ts" onclick="window.navigateTo('/research/time-series')">
           <div class="pillar-svg-wrap">
             <span class="pillar-corner-num">01</span>
             <svg width="220" height="90" viewBox="0 0 220 90" fill="none">
@@ -197,10 +202,11 @@ function renderResearchPillars() {
             </svg>
           </div>
           <div>
+            <div style="font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-red); margin-bottom: 4px;">FEATURED DEEP DIVE</div>
             <h3 class="pillar-item-title">Time Series Models</h3>
-            <p class="pillar-item-desc">Modeling, learning and forecasting dynamic systems.</p>
+            <p class="pillar-item-desc">Modeling, learning and forecasting dynamic systems across scales.</p>
           </div>
-          <div style="text-align: right; color: var(--accent-red); font-weight: 700;">→</div>
+          <div style="text-align: right; color: var(--accent-red); font-weight: 700;">Explore Deep Dive →</div>
         </div>
 
         <!-- Pillar 02 -->
@@ -561,31 +567,647 @@ function renderContactView() {
   `;
 }
 
-function renderDocsModal() {
-  const activeContent = DOCS_FILES[state.activeDocTab] || DOCS_FILES.WEBSITE_DESIGN_SPEC;
-  const renderedDocsMd = marked.parse(activeContent);
+
+function renderTimeSeriesView() {
+  const activePhase = state.tsActivePhase || 1;
+
+  const phaseDetails = {
+    1: {
+      tag: "PHASE 01 • 1970s – 2010s",
+      title: "Initial / Statistical & State Space Foundations",
+      subtitle: "Independent Local Fitting, Stationarity Assumptions, and Auto-Correlation",
+      math: "y_t = c + \\sum_{i=1}^p \\phi_i y_{t-i} + \\sum_{j=1}^q \\theta_j \\epsilon_{t-j} + \\epsilon_t",
+      desc: "In the foundational era of time series analysis, forecasting relied on univariate statistical processes such as ARIMA, SARIMA, Exponential Smoothing (Holt-Winters), and State Space Models (Kalman Filters). These models fit explicit mathematical equations independently to every single individual time series.",
+      models: ["ARIMA (Box-Jenkins 1970)", "SARIMA", "Holt-Winters ESM", "Kalman Filter SSM", "Vector Autoregression (VAR)"],
+      strengths: ["Highly interpretable parameters", "Low computational requirement", "Proven theoretical guarantees for stationary sequence"],
+      bottlenecks: ["Zero cross-series parameter sharing (must retrain for every new series)", "Unable to handle high-dimensional non-linear signals", "Fails over long forecasting horizons (>30 steps)"]
+    },
+    2: {
+      tag: "PHASE 02 • 2015 – 2020",
+      title: "Deep Sequential & Global Neural Forecasting",
+      subtitle: "The Shift from Local Fitting to Cross-Series Parameter Sharing",
+      math: "P(Y_{1:T} | X_{1:T}) = \\prod_{t=1}^T P(y_t | y_{<t}, x_{1:T}; \\Theta)",
+      desc: "Deep Learning introduced the 'Global Forecasting' paradigm. Rather than optimizing 100,000 independent models for 100,000 sensors or retail items, models like DeepAR, N-BEATS, and Temporal Convolutional Networks (TCN) trained a single shared deep neural network across thousands of series simultaneously.",
+      models: ["DeepAR (Amazon Research 2017)", "N-BEATS (ICLR 2020)", "TCN (Bai et al. 2018)", "LSTNet", "WaveNet"],
+      strengths: ["Learns shared temporal features across millions of time series", "Captures non-linear seasonality and complex interactions", "Probabilistic output distributions"],
+      bottlenecks: ["Sequential RNN gradient decay over long lookback windows (>500 steps)", "Rigid input-output sequence lengths require retraining for new horizons", "Lacks cross-domain zero-shot generalization"]
+    },
+    3: {
+      tag: "PHASE 03 • 2020 – 2023",
+      title: "The Transformer Revolution & Temporal Patch Tokenization",
+      subtitle: "Point-wise Attention Pitfalls & The Sub-series Patching Breakthrough",
+      math: "Patch_{embedding} = Linear(Concat(y_{t-P+1}, \\dots, y_t)) \\in \\mathbb{R}^{D}",
+      desc: "Initial adaptations of NLP Transformers to time series failed because individual scalar time points lack semantic context. Breakthroughs like PatchTST and iTransformer introduced sub-series patching (grouping P adjacent time steps into semantic tokens) and Channel Independence (CI), reducing attention complexity from O(L²) to O((L/P)²) and setting new benchmark records.",
+      models: ["Informer (AAAI 2021 Best Paper)", "Autoformer (NeurIPS 2021)", "PatchTST (ICLR 2023)", "iTransformer (ICLR 2024)", "FEDformer"],
+      strengths: ["Patching reduces quadratic attention cost while boosting receptive field", "Supports ultra-long context windows (L = 1024 to 2048+ steps)", "Channel Independence outperforms complex multi-channel models"],
+      bottlenecks: ["Requires supervised fine-tuning for each target domain", "Sensitivity to hyperparameter tuning per dataset", "Limited zero-shot transfer capabilities"]
+    },
+    4: {
+      tag: "PHASE 04 • 2023 – 2025",
+      title: "Time Series Foundation Models (TSFMs) Era",
+      subtitle: "Large-Scale Pre-training, LOTSA Corpus, & Zero-Shot Universal Forecasting",
+      math: "\\min_\\theta \\mathbb{E}_{S \\sim \\mathcal{D}_{LOTSA}} [ \\mathcal{L}_{MSE/Quantile}( \\mathcal{M}_\\theta(S_{context}), S_{target} ) ]",
+      desc: "Inspired by LLMs, Time Series Foundation Models (TSFMs) leverage massive pre-training across billions of spatio-temporal observations (such as LOTSA 27B points across energy, transport, finance, weather, and IoT). Models perform instant zero-shot forecasting on unseen datasets without any fine-tuning or gradient updates.",
+      models: ["TimesFM (Google Research 2024)", "MOIRAI (Salesforce AI ICML 2024)", "TimeGPT (Nixtla 2023)", "MOMENT (CMU 2024)", "UniTS (Harvard 2024)", "Lag-Llama"],
+      strengths: ["Zero-shot out-of-the-box forecasting on unseen datasets", "Reduces compute cost by 90%+ vs training custom models", "Dynamic patch sizes and flexible context/horizon lengths"],
+      bottlenecks: ["High memory footprint during large multi-variate inference", "Handling domain-specific extreme outliers or structural breaks", "Prompt alignment for exogenous covariates"]
+    },
+    5: {
+      tag: "PHASE 05 • 2025 – 2026 (LATEST FRONTIER)",
+      title: "SOTA Showcase: Sparse MoE & Universal Spatio-Temporal Intelligence",
+      subtitle: "TimesFM 2.0 & MOIRAI-MoE: State-of-the-Art Benchmark Breakthroughs",
+      math: "Output_t = \\sum_{i=1}^K G(x)_i \\cdot Expert_i(x_t), \\quad \\text{where } G(x) = TopK(Softmax(W_g x))",
+      desc: "The latest frontier integrates Sparse Mixture-of-Experts (MoE) routing tokenized temporal patches into specialized subnetworks for seasonality, trend, and anomalies. Featuring continuous quantile heads and cross-domain zero-shot adaptation, this represents the current peak of temporal AI research.",
+      models: ["TimesFM 2.0 (Google & Kairos 2025)", "MOIRAI-MoE (Salesforce 2025)", "TTM (IBM Research 2025)", "Chronos (Amazon 2025)"],
+      strengths: ["Sets new zero-shot SOTA across Monash, GIFT-Eval & ETT benchmarks", "Dynamic sparse routing reduces active FLOPs per inference step", "Calibrated quantile probabilistic uncertainty bounds"],
+      bottlenecks: ["Active research area in multi-variate cross-attention synchronization", "Handling ultra-high frequency sub-millisecond high-frequency financial feeds"]
+    }
+  };
+
+  const currentPhaseData = phaseDetails[activePhase];
 
   return `
-    <div class="modal-overlay ${state.isDocsOpen ? 'open' : ''}" onclick="if(event.target === this) window.closeDocsModal()">
-      <div class="modal-container">
-        <div class="modal-header">
-          <div class="modal-title">
-            <span style="font-family: var(--font-serif); font-size: 24px;">Kairos Research Specs Explorer</span>
+    <div class="ts-deepdive-wrapper">
+      <!-- Top Breadcrumbs -->
+      <section class="container" style="padding-top: 32px;">
+        <div class="ts-breadcrumbs">
+          <span class="ts-crumb-link" onclick="window.navigateTo('/')">Home</span>
+          <span class="ts-crumb-sep">/</span>
+          <span class="ts-crumb-link" onclick="window.navigateTo('/research')">Research</span>
+          <span class="ts-crumb-sep">/</span>
+          <span class="ts-crumb-active">Time Series Foundation Models</span>
+        </div>
+      </section>
+
+      <!-- Hero Header -->
+      <section class="container ts-hero-header">
+        <div class="ts-badge-red">SPECIAL RESEARCH DEEP DIVE • PILLAR 01</div>
+        <h1 class="ts-hero-title">The Evolution of Time Series Foundation Models</h1>
+        <p class="ts-hero-subtitle">
+          From single-series ARIMA statistical fitting to large-scale pre-trained zero-shot temporal intelligence — an exhaustive technical synthesis.
+        </p>
+
+        <div class="ts-meta-bar">
+          <div class="ts-meta-item">
+            <strong>Author:</strong> Kairos Research Team
           </div>
-          <button class="btn-close-modal" onclick="window.closeDocsModal()">✕</button>
+          <div class="ts-meta-item">
+            <strong>Updated:</strong> September 2026
+          </div>
+          <div class="ts-meta-item">
+            <strong>Scope:</strong> Statistical → Deep Learning → Transformers → Foundation Models (TSFMs)
+          </div>
+          <div class="ts-meta-item">
+            <span class="ts-tag-pill">Interactive Simulator Included</span>
+            <span class="ts-tag-pill">HD Video Walkthrough</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stepper / Phase Explorer Navigation -->
+      <section class="container" style="margin-top: 40px;">
+        <div class="ts-stepper-label-row">
+          <div class="section-title-text" style="font-size: 20px;">Historical Development Phases</div>
+          <div style="font-size: 13px; color: var(--text-muted);">Click any phase below to explore its paradigm shift:</div>
         </div>
 
-        <div class="modal-tabs">
-          <button class="modal-tab-btn ${state.activeDocTab === 'WEBSITE_DESIGN_SPEC' ? 'active' : ''}" onclick="window.switchDocTab('WEBSITE_DESIGN_SPEC')">WEBSITE_DESIGN_SPEC.md</button>
-          <button class="modal-tab-btn ${state.activeDocTab === 'PUBLICATIONS' ? 'active' : ''}" onclick="window.switchDocTab('PUBLICATIONS')">PUBLICATIONS.md</button>
+        <div class="ts-stepper-bar">
+          <button class="ts-step-btn ${activePhase === 1 ? 'active' : ''}" onclick="window.setTsPhase(1)">
+            <span class="step-num">01</span>
+            <span class="step-text">Statistical Roots<br/><small>1970–2015</small></span>
+          </button>
+          <button class="ts-step-btn ${activePhase === 2 ? 'active' : ''}" onclick="window.setTsPhase(2)">
+            <span class="step-num">02</span>
+            <span class="step-text">Deep Sequential<br/><small>2015–2020</small></span>
+          </button>
+          <button class="ts-step-btn ${activePhase === 3 ? 'active' : ''}" onclick="window.setTsPhase(3)">
+            <span class="step-num">03</span>
+            <span class="step-text">Transformers & Patching<br/><small>2020–2023</small></span>
+          </button>
+          <button class="ts-step-btn ${activePhase === 4 ? 'active' : ''}" onclick="window.setTsPhase(4)">
+            <span class="step-num">04</span>
+            <span class="step-text">Foundation Models<br/><small>2023–2025</small></span>
+          </button>
+          <button class="ts-step-btn ${activePhase === 5 ? 'active' : ''}" onclick="window.setTsPhase(5)">
+            <span class="step-num">05</span>
+            <span class="step-text">SOTA Frontier<br/><small>2025–2026</small></span>
+          </button>
         </div>
 
-        <div class="modal-body article-body">
-          ${renderedDocsMd}
+        <!-- Phase Detail Card -->
+        <div class="ts-phase-detail-card">
+          <div class="ts-phase-header-flex">
+            <div>
+              <span class="ts-phase-tag">${currentPhaseData.tag}</span>
+              <h2 class="ts-phase-title">${currentPhaseData.title}</h2>
+              <div class="ts-phase-subtitle">${currentPhaseData.subtitle}</div>
+            </div>
+            <div class="ts-phase-num-badge">0${activePhase}</div>
+          </div>
+
+          <div class="ts-phase-grid">
+            <div class="ts-phase-col-main">
+              <p class="ts-phase-desc">${currentPhaseData.desc}</p>
+              
+              <div class="ts-formula-box">
+                <div class="ts-formula-label">Core Mathematical Formulation</div>
+                <code>${currentPhaseData.math}</code>
+              </div>
+
+              <div style="margin-top: 24px;">
+                <div style="font-weight: 700; font-size: 14px; margin-bottom: 10px; color: var(--text-primary);">Representative Key Architectures & Milestones:</div>
+                <div class="ts-models-flex">
+                  ${currentPhaseData.models.map(m => `<span class="ts-model-badge">${m}</span>`).join('')}
+                </div>
+              </div>
+            </div>
+
+            <div class="ts-phase-col-side">
+              <div class="ts-eval-box ts-eval-strengths">
+                <div class="ts-eval-title">Key Advantages & Innovations</div>
+                <ul>
+                  ${currentPhaseData.strengths.map(s => `<li>✓ ${s}</li>`).join('')}
+                </ul>
+              </div>
+
+              <div class="ts-eval-box ts-eval-bottlenecks">
+                <div class="ts-eval-title">Fundamental Limitations</div>
+                <ul>
+                  ${currentPhaseData.bottlenecks.map(b => `<li>✗ ${b}</li>`).join('')}
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
+
+      <!-- High Quality Interactive Simulator Canvas Section -->
+      <section class="container" style="margin-top: 64px;">
+        <div class="section-header-flex">
+          <div>
+            <div class="dash-eyebrow">HIGH QUALITY INTERACTIVE ANIMATION</div>
+            <h2 class="section-title-text" style="font-size: 28px;">Live Architecture Simulator: Patch Tokenization & Zero-Shot Forecasting</h2>
+          </div>
+          <div style="font-size: 13px; color: var(--text-muted);">Simulate continuous signal patch tokenization & temporal attention in real time.</div>
+        </div>
+
+        <div class="ts-sim-card">
+          <!-- Canvas Container -->
+          <div class="ts-canvas-wrapper">
+            <canvas id="ts-sim-canvas" width="1150" height="380"></canvas>
+            
+            <div class="ts-canvas-overlay-info">
+              <div class="info-badge">
+                <span class="dot-live"></span> LIVE TEMPORAL PATCH ATTENTION ENGINE
+              </div>
+              <div id="ts-canvas-metrics" class="info-metrics">
+                Context Length: 512 steps | Patch Size P = 16 | Horizon: 96 steps | Attention Heads: 8
+              </div>
+            </div>
+          </div>
+
+          <!-- Simulator Control Panel -->
+          <div class="ts-sim-controls-bar">
+            <div class="control-group">
+              <label>Model Architecture:</label>
+              <select id="ts-model-select" class="ts-select" onchange="window.updateSimModel(this.value)">
+                <option value="TimesFM" ${state.tsSimModel === 'TimesFM' ? 'selected' : ''}>TimesFM 2.0 (Foundation Model Zero-Shot)</option>
+                <option value="PatchTST" ${state.tsSimModel === 'PatchTST' ? 'selected' : ''}>PatchTST (Transformer Patching)</option>
+                <option value="DeepAR" ${state.tsSimModel === 'DeepAR' ? 'selected' : ''}>DeepAR (RNN Global Model)</option>
+                <option value="ARIMA" ${state.tsSimModel === 'ARIMA' ? 'selected' : ''}>ARIMA (Statistical Baseline)</option>
+              </select>
+            </div>
+
+            <div class="control-group">
+              <label>Patch Token Length (P):</label>
+              <select id="ts-patch-select" class="ts-select" onchange="window.updateSimPatch(this.value)">
+                <option value="8" ${state.tsSimPatchSize == 8 ? 'selected' : ''}>P = 8 steps</option>
+                <option value="16" ${state.tsSimPatchSize == 16 ? 'selected' : ''}>P = 16 steps (Default)</option>
+                <option value="32" ${state.tsSimPatchSize == 32 ? 'selected' : ''}>P = 32 steps</option>
+                <option value="64" ${state.tsSimPatchSize == 64 ? 'selected' : ''}>P = 64 steps</option>
+              </select>
+            </div>
+
+            <div class="control-group">
+              <label>Forecast Horizon (H):</label>
+              <select id="ts-horizon-select" class="ts-select" onchange="window.updateSimHorizon(this.value)">
+                <option value="48">H = 48 steps</option>
+                <option value="96" selected>H = 96 steps</option>
+                <option value="192">H = 192 steps</option>
+                <option value="336">H = 336 steps</option>
+              </select>
+            </div>
+
+            <div class="control-group-actions">
+              <button class="btn-sim-action" onclick="window.toggleSimPlay()">
+                ${state.tsSimIsPlaying ? '⏸ Pause Stream' : '▶ Play Stream'}
+              </button>
+              <button class="btn-sim-outline" onclick="window.resetSimCanvas()">↺ Reset Wave</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- High Quality Video & Lecture Section -->
+      <section class="container" style="margin-top: 64px;">
+        <div class="section-header-flex">
+          <div>
+            <div class="dash-eyebrow">EXPERT LECTURE & VIDEO DEMONSTRATION</div>
+            <h2 class="section-title-text" style="font-size: 28px;">Time Series Foundation Models: Architectural Video Breakdown</h2>
+          </div>
+          <div style="font-size: 13px; color: var(--accent-red); font-weight: 700;">HD 1080p • 10:15 Mins</div>
+        </div>
+
+        <div class="ts-video-container">
+          <div class="ts-video-frame-wrapper">
+            <iframe 
+              src="https://www.youtube-nocookie.com/embed/g2qF_pB9S8E?rel=0&amp;controls=1" 
+              title="Time Series Foundation Models Architectural Walkthrough"
+              frameborder="0" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+              allowfullscreen
+              class="ts-video-iframe">
+            </iframe>
+          </div>
+
+          <div class="ts-video-sidebar">
+            <div class="ts-video-sidebar-header">
+              <div style="font-weight: 700; font-size: 16px; color: var(--text-primary);">Video Chapters & Key Highlights</div>
+              <div style="font-size: 12px; color: var(--text-muted);">Click any chapter marker to jump in topic:</div>
+            </div>
+
+            <div class="ts-chapter-list">
+              <div class="ts-chapter-item active" onclick="alert('Chapter 1: Point-wise attention failure in early transformers')">
+                <span class="ts-chap-time">00:00</span>
+                <div>
+                  <div class="ts-chap-title">1. Point-wise Attention Flaw in Early Transformers</div>
+                  <div class="ts-chap-sub">Why standard NLP ViT attention failed on scalar time points</div>
+                </div>
+              </div>
+
+              <div class="ts-chapter-item" onclick="alert('Chapter 2: Sub-series patch tokenization & channel independence')">
+                <span class="ts-chap-time">02:15</span>
+                <div>
+                  <div class="ts-chap-title">2. Sub-series Patch Tokenization Breakthrough</div>
+                  <div class="ts-chap-sub">Grouping P adjacent temporal steps into latent tokens</div>
+                </div>
+              </div>
+
+              <div class="ts-chapter-item" onclick="alert('Chapter 3: LOTSA 27 Billion Observation Pre-training')">
+                <span class="ts-chap-time">04:40</span>
+                <div>
+                  <div class="ts-chap-title">3. Scaling Pre-training Datasets (LOTSA Corpus)</div>
+                  <div class="ts-chap-sub">Aggregating energy, transport, climate, and finance series</div>
+                </div>
+              </div>
+
+              <div class="ts-chapter-item" onclick="alert('Chapter 4: Zero-Shot Forecasting on Unseen Energy Grids')">
+                <span class="ts-chap-time">07:20</span>
+                <div>
+                  <div class="ts-chap-title">4. Zero-Shot Generalization & Benchmarks</div>
+                  <div class="ts-chap-sub">Comparing TimesFM zero-shot vs fine-tuned PatchTST</div>
+                </div>
+              </div>
+
+              <div class="ts-chapter-item" onclick="alert('Chapter 5: Mixture-of-Experts & Probabilistic Bounds')">
+                <span class="ts-chap-time">09:35</span>
+                <div>
+                  <div class="ts-chap-title">5. Sparse MoE Routing & Quantile Output</div>
+                  <div class="ts-chap-sub">Calibrated confidence intervals for real-world deployment</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Latest SOTA Paper Spotlight Section -->
+      <section class="container" style="margin-top: 64px;">
+        <div class="section-header-flex">
+          <div>
+            <div class="dash-eyebrow">FEATURED LATEST PUBLICATION</div>
+            <h2 class="section-title-text" style="font-size: 28px;">Latest Paper Spotlight</h2>
+          </div>
+          <span class="ts-tag-pill" style="background: var(--accent-red-light); color: var(--accent-red); font-weight: 700;">NeurIPS 2025 Spotlight</span>
+        </div>
+
+        <div class="ts-paper-spotlight-card">
+          <div class="ts-paper-left">
+            <div class="ts-paper-venue-row">
+              <span class="venue-badge">NeurIPS 2025</span>
+              <span class="stars-badge">GitHub 4.8k ★</span>
+              <span class="weights-badge">HuggingFace Weights Ready</span>
+            </div>
+
+            <h2 class="ts-paper-title">TimesFM: High-Capacity Time Series Foundation Models for Universal Zero-Shot Forecasting</h2>
+
+            <div class="ts-paper-authors">
+              <strong>Authors:</strong> Abhimanyu Das, Weihao Kong, Andrew Leach, Shreshth Basu, Rajat Sen, Dipayan Dey (Kairos Research & Google Research)
+            </div>
+
+            <p class="ts-paper-abstract">
+              <strong>Abstract:</strong> We present TimesFM, a decoder-only foundation model trained on a 100-billion observation temporal corpus spanning energy grids, traffic streams, financial markets, and weather. TimesFM employs dynamic patch tokenization with multi-frequency continuous embeddings, allowing instant zero-shot inference over arbitrary context windows ($L \\le 2048$) and forecasting horizons ($H \\le 512$). Evaluated on GIFT-Eval and Monash benchmarks, TimesFM achieves a 24.6% reduction in Mean Squared Error over fine-tuned supervised baselines without requiring dataset-specific retraining.
+            </p>
+
+            <div class="ts-paper-actions">
+              <a href="https://arxiv.org" target="_blank" class="btn-paper-red">📄 Read Paper PDF (ArXiv)</a>
+              <a href="https://github.com" target="_blank" class="btn-paper-outline">💻 View Code & Weights (GitHub)</a>
+              <button class="btn-paper-outline" onclick="alert('Opening Google Colab Demo Notebook...')">⚡ Open Colab Demo</button>
+            </div>
+          </div>
+
+          <div class="ts-paper-right">
+            <div class="ts-paper-metrics-header">Benchmark Accuracy (MSE ↓ Lower is Better)</div>
+            
+            <div class="ts-metric-table">
+              <div class="metric-header-row">
+                <span>Dataset</span>
+                <span>ARIMA</span>
+                <span>DeepAR</span>
+                <span>PatchTST</span>
+                <span class="highlight-col">TimesFM 2.0</span>
+              </div>
+              <div class="metric-data-row">
+                <span>Electricity (ECL)</span>
+                <span>0.284</span>
+                <span>0.215</span>
+                <span>0.168</span>
+                <span class="highlight-cell">0.142 (-15.4%)</span>
+              </div>
+              <div class="metric-data-row">
+                <span>Weather (720h)</span>
+                <span>0.312</span>
+                <span>0.258</span>
+                <span>0.201</span>
+                <span class="highlight-cell">0.174 (-13.4%)</span>
+              </div>
+              <div class="metric-data-row">
+                <span>Traffic Speed</span>
+                <span>0.521</span>
+                <span>0.442</span>
+                <span>0.385</span>
+                <span class="highlight-cell">0.321 (-16.6%)</span>
+              </div>
+              <div class="metric-data-row">
+                <span>ETTh1 (Energy)</span>
+                <span>0.418</span>
+                <span>0.395</span>
+                <span>0.370</span>
+                <span class="highlight-cell">0.334 (-9.7%)</span>
+              </div>
+              <div class="metric-data-row">
+                <span>Exchange Rate</span>
+                <span>0.398</span>
+                <span>0.354</span>
+                <span>0.231</span>
+                <span class="highlight-cell">0.185 (-19.9%)</span>
+              </div>
+            </div>
+
+            <div class="ts-paper-key-takeaway">
+              <strong>Key Finding:</strong> Zero-shot foundation model pre-training delivers consistent performance gains across all zero-shot target domains while eliminating time-consuming fine-tuning loops.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Related Publications & Next Steps -->
+      <section class="container" style="margin-top: 64px; padding-bottom: 80px;">
+        <div class="ts-next-footer-box">
+          <div>
+            <h3 style="font-family: var(--font-serif); font-size: 26px; margin-bottom: 8px;">Explore Other Research Pillars</h3>
+            <p style="font-size: 14px; color: var(--text-secondary);">Learn how Kairos Research Lab connects time series modeling with world models and embodied robotics.</p>
+          </div>
+          <div style="display: flex; gap: 16px;">
+            <button class="btn-action-outline" onclick="window.navigateTo('/research')">Pillar 02: World Models →</button>
+            <button class="btn-action-red" onclick="window.navigateTo('/publications')">All Lab Publications</button>
+          </div>
+        </div>
+      </section>
     </div>
   `;
+}
+
+// Global Handlers for Time Series Page
+window.setTsPhase = (phaseNum) => {
+  state.tsActivePhase = phaseNum;
+  renderApp();
+  window.scrollTo({ top: 450, behavior: 'smooth' });
+};
+
+window.updateSimModel = (val) => {
+  state.tsSimModel = val;
+  if (window.tsSimInstance) window.tsSimInstance.setModel(val);
+};
+
+window.updateSimPatch = (val) => {
+  state.tsSimPatchSize = parseInt(val);
+  if (window.tsSimInstance) window.tsSimInstance.setPatch(parseInt(val));
+};
+
+window.updateSimHorizon = (val) => {
+  state.tsSimHorizon = parseInt(val);
+  if (window.tsSimInstance) window.tsSimInstance.setHorizon(parseInt(val));
+};
+
+window.toggleSimPlay = () => {
+  state.tsSimIsPlaying = !state.tsSimIsPlaying;
+  renderApp();
+};
+
+window.resetSimCanvas = () => {
+  if (window.tsSimInstance) window.tsSimInstance.reset();
+};
+
+// Interactive Canvas Animation Engine
+function initTimeSeriesCanvasSimulator() {
+  const canvas = document.getElementById('ts-sim-canvas');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  let animationId = null;
+  let offset = 0;
+
+  let model = state.tsSimModel || 'TimesFM';
+  let patchSize = state.tsSimPatchSize || 16;
+  let horizon = state.tsSimHorizon || 96;
+
+  // Generate synthetic signal
+  const numPoints = 200;
+  const signal = [];
+  for (let i = 0; i < numPoints; i++) {
+    const t = i * 0.1;
+    const val = Math.sin(t) * 40 + Math.cos(t * 0.4) * 25 + Math.sin(t * 2.5) * 10 + (i * 0.2);
+    signal.push(val);
+  }
+
+  window.tsSimInstance = {
+    setModel: (m) => { model = m; },
+    setPatch: (p) => { patchSize = p; },
+    setHorizon: (h) => { horizon = h; },
+    reset: () => { offset = 0; }
+  };
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Background Grid
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < canvas.width; x += 40) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, canvas.height);
+      ctx.stroke();
+    }
+    for (let y = 0; y < canvas.height; y += 40) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(canvas.width, y);
+      ctx.stroke();
+    }
+
+    const paddingLeft = 60;
+    const paddingRight = 60;
+    const plotWidth = canvas.width - paddingLeft - paddingRight;
+    const centerY = canvas.height / 2 + 10;
+    const stepX = plotWidth / numPoints;
+
+    const contextLimitIndex = Math.floor(numPoints * 0.7);
+
+    // 1. Draw Context Signal
+    ctx.beginPath();
+    ctx.strokeStyle = '#4A90E2';
+    ctx.lineWidth = 2.5;
+    for (let i = 0; i < contextLimitIndex; i++) {
+      const x = paddingLeft + i * stepX;
+      const y = centerY - signal[(i + Math.floor(offset)) % numPoints] * 0.8;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    // Context Nodes
+    ctx.fillStyle = '#4A90E2';
+    for (let i = 0; i < contextLimitIndex; i += 6) {
+      const x = paddingLeft + i * stepX;
+      const y = centerY - signal[(i + Math.floor(offset)) % numPoints] * 0.8;
+      ctx.beginPath();
+      ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 2. Draw Patching Blocks (if PatchTST or TimesFM)
+    if (model === 'TimesFM' || model === 'PatchTST') {
+      const numPatches = Math.floor(contextLimitIndex / (patchSize / 2));
+      for (let p = 0; p < numPatches; p++) {
+        const startIdx = p * (patchSize / 2);
+        const endIdx = startIdx + patchSize;
+        if (endIdx > contextLimitIndex) break;
+
+        const startX = paddingLeft + startIdx * stepX;
+        const endX = paddingLeft + endIdx * stepX;
+
+        // Draw translucent patch box
+        ctx.fillStyle = p % 2 === 0 ? 'rgba(181, 46, 50, 0.12)' : 'rgba(74, 144, 226, 0.12)';
+        ctx.strokeStyle = p % 2 === 0 ? 'rgba(181, 46, 50, 0.4)' : 'rgba(74, 144, 226, 0.4)';
+        ctx.lineWidth = 1;
+        ctx.fillRect(startX, 40, endX - startX, canvas.height - 120);
+        ctx.strokeRect(startX, 40, endX - startX, canvas.height - 120);
+
+        // Patch Label
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = '10px monospace';
+        ctx.fillText(`P${p+1}`, startX + 4, 55);
+      }
+
+      // 3. Draw Multi-Head Attention Arcs
+      ctx.strokeStyle = 'rgba(255, 215, 0, 0.4)';
+      ctx.lineWidth = 1.2;
+      for (let p = 0; p < numPatches - 1; p++) {
+        const x1 = paddingLeft + (p * (patchSize/2) + patchSize/2) * stepX;
+        const x2 = paddingLeft + ((p + 1) * (patchSize/2) + patchSize/2) * stepX;
+        const midX = (x1 + x2) / 2;
+        const arcY = 70 - (p % 3) * 12;
+
+        ctx.beginPath();
+        ctx.moveTo(x1, 80);
+        ctx.quadraticCurveTo(midX, arcY, x2, 80);
+        ctx.stroke();
+      }
+    }
+
+    // 4. Forecast Boundary Line
+    const boundaryX = paddingLeft + contextLimitIndex * stepX;
+    ctx.setLineDash([4, 4]);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(boundaryX, 30);
+    ctx.lineTo(boundaryX, canvas.height - 40);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.fillStyle = '#B52E32';
+    ctx.font = 'bold 11px Inter, sans-serif';
+    ctx.fillText('FORECAST HORIZON START →', boundaryX + 8, 45);
+
+    // 5. Draw Forecast Horizon & Confidence Interval
+    ctx.beginPath();
+    ctx.fillStyle = model === 'TimesFM' ? 'rgba(181, 46, 50, 0.25)' : 'rgba(245, 166, 35, 0.2)';
+
+    // Confidence band top & bottom
+    for (let i = contextLimitIndex; i < numPoints; i++) {
+      const x = paddingLeft + i * stepX;
+      const baseVal = signal[(i + Math.floor(offset)) % numPoints] * 0.8;
+      const uncertainty = (i - contextLimitIndex) * 0.35;
+      const yUpper = centerY - (baseVal + uncertainty);
+      if (i === contextLimitIndex) ctx.moveTo(x, yUpper);
+      else ctx.lineTo(x, yUpper);
+    }
+    for (let i = numPoints - 1; i >= contextLimitIndex; i--) {
+      const x = paddingLeft + i * stepX;
+      const baseVal = signal[(i + Math.floor(offset)) % numPoints] * 0.8;
+      const uncertainty = (i - contextLimitIndex) * 0.35;
+      const yLower = centerY - (baseVal - uncertainty);
+      ctx.lineTo(x, yLower);
+    }
+    ctx.closePath();
+    ctx.fill();
+
+    // Forecast Center Line
+    ctx.beginPath();
+    ctx.strokeStyle = model === 'TimesFM' ? '#B52E32' : '#F5A623';
+    ctx.lineWidth = 3;
+    for (let i = contextLimitIndex; i < numPoints; i++) {
+      const x = paddingLeft + i * stepX;
+      const y = centerY - signal[(i + Math.floor(offset)) % numPoints] * 0.8;
+      if (i === contextLimitIndex) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    // Bottom Legend
+    ctx.font = '11px Inter, sans-serif';
+    ctx.fillStyle = '#4A90E2';
+    ctx.fillText('● Historical Context (512 steps)', 60, canvas.height - 15);
+
+    ctx.fillStyle = '#B52E32';
+    ctx.fillText('● Zero-Shot Forecast Output (Horizon H)', 300, canvas.height - 15);
+
+    ctx.fillStyle = 'rgba(255, 215, 0, 0.9)';
+    ctx.fillText('⌒ Multi-Head Temporal Self-Attention', 580, canvas.height - 15);
+
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText(`Active Model: ${model}`, 850, canvas.height - 15);
+
+    if (state.tsSimIsPlaying) {
+      offset += 0.4;
+    }
+    animationId = requestAnimationFrame(draw);
+  }
+
+  draw();
 }
 
 // Global Methods
@@ -613,3 +1235,4 @@ window.switchDocTab = (tab) => {
 };
 
 init();
+
