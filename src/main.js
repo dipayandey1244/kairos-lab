@@ -33,24 +33,43 @@ Models. Embodiment. Real-World Impact.
 
 const app = document.getElementById('app');
 
+function getNormalizedPath() {
+  let path = window.location.hash ? window.location.hash.replace('#', '') : window.location.pathname;
+  if (path.startsWith('/kairos-lab')) {
+    path = path.replace('/kairos-lab', '');
+  }
+  if (!path || path === '' || path === '/index.html') {
+    path = '/';
+  }
+  return path;
+}
+
 function init() {
   window.addEventListener('popstate', handlePopState);
+  window.addEventListener('hashchange', handlePopState);
+  state.currentPath = getNormalizedPath();
   renderApp();
 }
 
 function handlePopState() {
-  state.currentPath = window.location.pathname || '/';
+  state.currentPath = getNormalizedPath();
   renderApp();
 }
 
 function navigateTo(path) {
-  window.history.pushState({}, '', path);
-  state.currentPath = path;
+  if (window.location.protocol === 'https:' && window.location.hostname.includes('github.io')) {
+    window.location.hash = path;
+  } else {
+    window.history.pushState({}, '', path);
+  }
+  state.currentPath = getNormalizedPath();
   window.scrollTo({ top: 0, behavior: 'smooth' });
   renderApp();
 }
 
 function renderApp() {
+  state.currentPath = getNormalizedPath();
+
   app.innerHTML = `
     ${renderHeader()}
     <main>
@@ -60,12 +79,16 @@ function renderApp() {
     ${renderDocsModal()}
   `;
 
-  if (state.currentPath === '/research/time-series') {
+  if (state.currentPath.includes('time-series')) {
     setTimeout(initTimeSeriesCanvasSimulator, 50);
+  }
+  if (state.currentPath.includes('projects')) {
+    setTimeout(initProjectsCanvasSimulators, 50);
   }
 }
 
 function renderHeader() {
+  const p = getNormalizedPath();
   return `
     <header class="site-header">
       <div class="container header-inner">
@@ -79,13 +102,13 @@ function renderHeader() {
         </div>
 
         <ul class="nav-menu">
-          <li class="nav-link ${state.currentPath === '/' ? 'active' : ''}" onclick="window.navigateTo('/')">Home</li>
-          <li class="nav-link ${state.currentPath.startsWith('/research') ? 'active' : ''}" onclick="window.navigateTo('/research')">Research</li>
-          <li class="nav-link ${state.currentPath === '/people' ? 'active' : ''}" onclick="window.navigateTo('/people')">People</li>
-          <li class="nav-link ${state.currentPath === '/publications' ? 'active' : ''}" onclick="window.navigateTo('/publications')">Publications</li>
-          <li class="nav-link ${state.currentPath === '/projects' ? 'active' : ''}" onclick="window.navigateTo('/projects')">Projects</li>
-          <li class="nav-link ${state.currentPath === '/news' ? 'active' : ''}" onclick="window.navigateTo('/news')">News</li>
-          <li class="nav-link ${state.currentPath === '/contact' ? 'active' : ''}" onclick="window.navigateTo('/contact')">Contact</li>
+          <li class="nav-link ${p === '/' ? 'active' : ''}" onclick="window.navigateTo('/')">Home</li>
+          <li class="nav-link ${p.startsWith('/research') ? 'active' : ''}" onclick="window.navigateTo('/research')">Research</li>
+          <li class="nav-link ${p === '/people' ? 'active' : ''}" onclick="window.navigateTo('/people')">People</li>
+          <li class="nav-link ${p === '/publications' ? 'active' : ''}" onclick="window.navigateTo('/publications')">Publications</li>
+          <li class="nav-link ${p.startsWith('/projects') ? 'active' : ''}" onclick="window.navigateTo('/projects')">Projects</li>
+          <li class="nav-link ${p === '/news' ? 'active' : ''}" onclick="window.navigateTo('/news')">News</li>
+          <li class="nav-link ${p === '/contact' ? 'active' : ''}" onclick="window.navigateTo('/contact')">Contact</li>
         </ul>
 
         <div class="header-right">
@@ -100,16 +123,16 @@ function renderHeader() {
 }
 
 function renderRouter() {
-  const p = state.currentPath;
+  const p = getNormalizedPath();
 
   if (p === '/' || p === '/home') return renderHomeView();
-  if (p === '/research/time-series') return renderTimeSeriesView();
+  if (p.includes('time-series')) return renderTimeSeriesView();
   if (p.startsWith('/research')) return renderResearchView();
   if (p.startsWith('/projects')) return renderProjectsView();
-  if (p === '/publications') return renderPublicationsView();
-  if (p === '/people') return renderPeopleView();
-  if (p === '/news') return renderNewsView();
-  if (p === '/contact') return renderContactView();
+  if (p.startsWith('/publications')) return renderPublicationsView();
+  if (p.startsWith('/people')) return renderPeopleView();
+  if (p.startsWith('/news')) return renderNewsView();
+  if (p.startsWith('/contact')) return renderContactView();
 
   return renderHomeView();
 }
