@@ -1,0 +1,1318 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Kairos Research Lab — Time Series Foundation Models</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet"><style>
+:root{
+  --paper:#FCFAF8;--white:#fff;--ink:#15202B;--muted:#68717A;
+  --red:#C6292E;--red-soft:#FBEFED;--line:#E7E3DF;
+  --serif:"Cormorant Garamond",Georgia,serif;
+  --sans:"Inter",Arial,sans-serif;
+  --mono:"Roboto Mono",monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif)}
+a{color:inherit;text-decoration:none}
+button{font:inherit}
+.site{max-width:1160px;margin:auto;padding:0 28px}
+header{
+  height:60px;border-bottom:1px solid var(--line);display:flex;align-items:center;
+  justify-content:space-between;background:rgba(252,250,248,.97);position:sticky;top:0;z-index:20
+}
+.brand{display:flex;align-items:center;gap:25px}
+.logo{line-height:.72;color:var(--red);font:500 31px var(--serif);letter-spacing:-.5px}
+.logo small{display:block;margin-top:7px;color:#454c52;font:500 7px var(--sans);letter-spacing:3px}
+.tagline{font-size:12px;color:#697078}
+.nav{display:flex;align-items:center;gap:27px;font:500 10px var(--sans)}
+.nav a{position:relative;padding:22px 0}
+.nav a.active{color:var(--red)}
+.nav a.active:after{content:"";position:absolute;left:0;right:0;bottom:10px;height:1px;background:var(--red)}
+.nav a.active:before{content:"";position:absolute;left:50%;bottom:6px;width:4px;height:4px;background:var(--red);border-radius:50%;transform:translateX(-50%)}
+.actions{display:flex;align-items:center;gap:10px}
+.search{width:36px;height:32px;border:1px solid var(--line);background:var(--paper);border-radius:4px;display:grid;place-items:center;cursor:pointer}
+.search svg{width:15px}
+.cta{border:1px solid var(--red);background:var(--red);color:#fff;padding:9px 19px;border-radius:4px;font:500 10px var(--sans);cursor:pointer}
+
+.hero{position:relative;margin:18px 0 20px;min-height:500px;overflow:hidden;border-radius:5px}
+.hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
+.hero-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(90deg,rgba(252,250,248,.98) 0%,rgba(252,250,248,.91) 31%,rgba(252,250,248,.22) 58%,rgba(252,250,248,.03) 100%);
+}
+.hero-copy{position:relative;width:54%;padding:112px 0 70px 26px;z-index:2}
+.eyebrow{display:flex;align-items:center;gap:13px;font:500 8px var(--sans);letter-spacing:3.1px;color:#58616a}
+.rule{width:43px;height:2px;background:var(--red);display:inline-block}
+h1{font:400 55px/.88 var(--serif);letter-spacing:-1.8px;margin:31px 0 20px;max-width:650px}
+h1 em{font-style:normal;color:var(--red)}
+.hero-copy p{font:400 18px/1.13 var(--serif);color:#626b73;max-width:500px;margin:0 0 24px}
+.hero-buttons{display:flex;gap:12px}
+.btn{padding:11px 24px;border-radius:4px;font:500 10px var(--sans);cursor:pointer}
+.btn.primary{background:var(--red);color:#fff;border:1px solid var(--red)}
+.btn.secondary{background:rgba(252,250,248,.9);color:var(--red);border:1px solid var(--red)}
+.metrics{display:flex;gap:47px;margin-top:31px}
+.metric b{font:400 26px var(--serif)}
+.metric span{display:block;color:var(--muted);font:400 9px var(--sans);margin-top:2px}
+.hero-side{
+  position:absolute;right:25px;top:25px;width:125px;color:#414950;
+  font:500 8px/2 var(--sans);letter-spacing:3px;text-transform:uppercase;text-align:left
+}
+.hero-caption{position:absolute;right:25px;bottom:27px;width:190px;font:italic 17px/1.05 var(--serif)}
+.hero-caption:before{content:"";display:block;width:33px;height:2px;background:var(--red);margin-bottom:12px}
+
+.section{margin:0 0 24px}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.section-title{display:flex;align-items:center;gap:14px;font:500 23px var(--serif)}
+.section-title:before{content:"";width:27px;height:2px;background:var(--red)}
+.section-link{font:400 11px var(--serif);color:var(--red)}
+.focus-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.focus-card{
+  min-height:198px;border:1px solid var(--line);border-radius:5px;background:#fff;
+  padding:14px 17px;position:relative;overflow:hidden;transition:transform .25s ease,border-color .25s ease;cursor:pointer
+}
+.focus-card:hover{transform:translateY(-2px);border-color:#d9d2cc}
+.focus-num{font:500 9px var(--sans);color:#7c858d;letter-spacing:1px}
+.focus-art{height:90px;margin:-2px -4px 0;display:flex;align-items:center}
+.focus-card h2{font:500 18px var(--serif);margin:0 0 3px}
+.focus-card p{font:400 11px/1.22 var(--serif);color:var(--muted);max-width:240px;margin:0}
+.arrow{position:absolute;right:14px;bottom:14px;color:var(--red);font:500 14px var(--serif)}
+
+.mission{background:var(--red-soft);border-radius:5px;padding:22px 25px;display:grid;grid-template-columns:1fr 2fr;gap:30px}
+.mission h2{font:500 23px var(--serif);margin:0}
+.mission p{font:400 13px/1.3 var(--serif);color:#656c73;margin:0;max-width:650px}
+
+.feature-grid{display:grid;grid-template-columns:1.55fr 1fr;gap:10px}
+.feature{
+  min-height:190px;border:1px solid var(--line);background:#fff;border-radius:5px;
+  display:grid;grid-template-columns:1fr 1.1fr;overflow:hidden
+}
+.feature-copy{padding:18px}
+.feature-copy .label{font:600 7px var(--sans);letter-spacing:2px;color:var(--red)}
+.feature-copy h2{font:500 25px/.92 var(--serif);margin:11px 0}
+.feature-copy p{font:400 11px/1.22 var(--serif);color:var(--muted);margin:0}
+.feature-image{background:linear-gradient(135deg,#f4eeeb,#e8ded9);position:relative}
+.news{border:1px solid var(--line);background:#fff;border-radius:5px}
+.news-row{display:grid;grid-template-columns:70px 1fr;gap:8px;padding:12px;border-bottom:1px solid var(--line)}
+.news-row:last-child{border-bottom:0}
+.news-date{font:500 7px var(--sans);letter-spacing:1px;color:#858c92}
+.news-row h3{font:500 14px/1.05 var(--serif);margin:0}
+.news-row p{font:400 9px var(--sans);color:var(--muted);margin:4px 0 0}
+
+.footer{border-top:1px solid var(--line);margin-top:28px;padding:19px 0 25px;display:flex;align-items:center;justify-content:space-between}
+.footer .logo{font-size:26px}
+.footer-tag{font:400 11px var(--serif);color:var(--muted)}
+.footer-nav{display:flex;gap:22px;font:500 9px var(--sans)}
+.focus-card[data-page]{cursor:pointer}
+.view{display:none}
+.view.active{display:block}
+
+@media(max-width:900px){
+  .nav{display:none}.tagline{display:none}.hero{min-height:610px}
+  .hero-copy{width:70%;padding-top:100px}
+  h1{font-size:48px}
+  .focus-grid{grid-template-columns:1fr}
+  .feature-grid{grid-template-columns:1fr}
+}
+@media(max-width:620px){
+  .site{padding:0 16px}.hero{min-height:650px;margin-top:10px}
+  .hero img{object-position:62% center}.hero-overlay{background:linear-gradient(90deg,rgba(252,250,248,.97) 0%,rgba(252,250,248,.84) 58%,rgba(252,250,248,.18) 100%)}
+  .hero-copy{width:100%;padding:85px 20px 40px}
+  h1{font-size:43px}.hero-copy p{font-size:17px}.hero-side{display:none}
+  .metrics{gap:19px;flex-wrap:wrap}.metric b{font-size:23px}
+  .mission{grid-template-columns:1fr}.feature{grid-template-columns:1fr}.feature-image{background:linear-gradient(135deg,#f4eeeb,#e8ded9);position:relative}
+  .footer{align-items:flex-start;gap:15px;flex-direction:column}.footer-nav{flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.focus-card{transition:none}}
+
+/* Interactive TSFM chapter */
+.ts-page{padding:34px 0 55px}.back{font:500 11px var(--sans);color:var(--red);display:inline-flex;align-items:center;gap:6px;margin-bottom:24px;cursor:pointer}
+.ts-page-nav-bar{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:24px}
+.view-mode-tabs{display:flex;gap:8px}
+.view-mode-btn{padding:8px 16px;border:1px solid var(--line);background:#fff;border-radius:4px;font:500 10px var(--sans);cursor:pointer;transition:all .2s}
+.view-mode-btn.active{background:var(--red);color:#fff;border-color:var(--red)}
+
+.ts-hero{display:grid;grid-template-columns:1.05fr .95fr;gap:28px;align-items:stretch;margin-bottom:24px}
+.ts-hero-copy{padding:16px 0}
+.ts-hero-copy h2{font:400 52px/.95 var(--serif);letter-spacing:-1.6px;margin:20px 0 16px}
+.ts-hero-copy h2 em{font-style:normal;color:var(--red)}
+.ts-hero-copy>p{font:400 17px/1.3 var(--serif);color:var(--muted);max-width:620px;margin:0 0 16px}
+.hero-note{background:var(--red-soft);border-left:3px solid var(--red);padding:10px 14px;border-radius:0 4px 4px 0;margin:16px 0;font:400 13px/1.35 var(--serif);color:#4a5259}
+.hero-note b{font-family:var(--sans);font-size:9px;letter-spacing:1px;color:var(--red);display:block;margin-bottom:2px}
+.chapter-nav{display:flex;gap:7px;flex-wrap:wrap;margin:18px 0}
+.chip{border:1px solid var(--line);background:#fff;padding:7px 11px;border-radius:3px;font:500 8.5px var(--sans);letter-spacing:.6px;cursor:pointer;transition:all .2s}
+.chip:hover,.chip.active{border-color:var(--red);color:var(--red);background:#fffaf8}
+
+.ts-visual{border:1px solid var(--line);background:#fff;border-radius:5px;min-height:330px;padding:15px;position:relative;overflow:hidden}
+.visual-label{font:600 7px var(--sans);letter-spacing:2px;color:var(--red)}
+.visual-caption{font:italic 12px var(--serif);color:var(--muted);margin-top:12px;text-align:center}
+
+/* Google Research Article Integration Styles */
+.gr-article-wrapper{background:#fff;border:1px solid var(--line);border-radius:6px;padding:36px 40px;margin-bottom:32px;box-shadow:0 1px 4px rgba(0,0,0,.03)}
+.gr-meta-tag{display:inline-flex;align-items:center;gap:8px;font:600 8px var(--sans);letter-spacing:2px;color:var(--red);text-transform:uppercase;margin-bottom:12px}
+.gr-article-title{font:400 42px/1.08 var(--serif);letter-spacing:-1px;margin:0 0 14px;color:var(--ink)}
+.gr-byline{font:400 12px var(--sans);color:var(--muted);margin-bottom:28px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.gr-byline span.dot{width:3px;height:3px;background:#bbb;border-radius:50%}
+.gr-summary-box{background:var(--red-soft);border-left:3px solid var(--red);padding:18px 22px;border-radius:0 4px 4px 0;margin-bottom:28px;font:400 17px/1.35 var(--serif);color:#2d3339}
+.gr-body-p{font:400 15px/1.65 var(--serif);color:#3c4248;margin-bottom:20px}
+.gr-subhead{font:500 27px var(--serif);margin:34px 0 14px;color:var(--ink);border-bottom:1px solid var(--line);padding-bottom:6px}
+
+/* Figures */
+.gr-fig-card{border:1px solid var(--line);border-radius:5px;background:#fdfcfb;margin:26px 0;overflow:hidden}
+.gr-fig-body{padding:20px}
+.gr-fig-caption{padding:12px 18px;background:#f8f5f2;border-top:1px solid var(--line);font:italic 13px/1.4 var(--serif);color:var(--muted);text-align:center}
+
+.prompt-cmp-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.prompt-cmp-box{background:#fff;border:1px solid var(--line);border-radius:4px;padding:16px}
+.prompt-cmp-box h5{font:600 9px var(--sans);letter-spacing:1px;color:var(--red);text-transform:uppercase;margin:0 0 10px}
+.prompt-code{font:400 11px/1.5 var(--mono);background:#fbf9f7;border:1px solid #ede8e3;padding:10px;border-radius:4px;margin-bottom:8px}
+
+.sim-control-strip{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.shot-btn-group{display:inline-flex;gap:4px;background:#f2ede8;padding:3px;border-radius:3px}
+.shot-btn{padding:5px 12px;border:none;background:transparent;border-radius:3px;font:500 9px var(--sans);cursor:pointer;color:#555}
+.shot-btn.active{background:#fff;color:var(--red);box-shadow:0 1px 3px rgba(0,0,0,.1);font-weight:600}
+
+.canvas-box{background:#fff;border:1px solid var(--line);border-radius:4px;height:240px;width:100%;overflow:hidden}
+#fewShotCanvas{width:100%;height:100%;display:block}
+
+.stream-tokens-strip{display:flex;gap:6px;overflow-x:auto;padding:8px 0;margin-top:10px}
+.tok-badge{font:500 10px var(--mono);padding:4px 9px;border-radius:3px;border:1px solid var(--line);white-space:nowrap}
+.tok-ex{background:#fdf5f4;color:#9c2327;border-color:#ecc9c6}
+.tok-sep{background:#c6292e;color:#fff;font-weight:700}
+.tok-target{background:#edf7ed;color:#1e4620;border-color:#c8e6c9}
+
+/* Benchmark Bar Chart */
+.bar-chart-card{background:#fff;border:1px solid var(--line);border-radius:4px;padding:18px}
+.bar-chart-row{display:grid;grid-template-columns:160px 1fr 70px;align-items:center;gap:14px;margin:12px 0}
+.bar-row-label{font:500 12px var(--sans);color:#333}
+.bar-track{height:24px;background:#f0eae5;border-radius:3px;overflow:hidden;position:relative}
+.bar-prog{height:100%;border-radius:3px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font:600 10px var(--mono);color:#fff}
+.bar-base{background:#8a827d}
+.bar-ft{background:#415462}
+.bar-icf{background:var(--red)}
+.bar-score{font:600 12px var(--mono);text-align:right}
+
+.source-strip{display:flex;gap:16px;flex-wrap:wrap;padding:14px 0;border-top:1px solid var(--line);margin-top:20px}
+.source-strip a{font:500 10px var(--sans);color:var(--red);display:inline-flex;align-items:center;gap:4px}
+.source-strip a:hover{text-decoration:underline}
+
+/* Classical Math & Lab sections */
+.ts-section{margin-top:28px}
+.ts-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:11px}
+.ts-head h3{font:400 27px var(--serif);margin:0}
+.ts-head p{font:400 11px var(--serif);color:var(--muted);margin:0}
+.timeline{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.era{border:1px solid var(--line);background:#fff;padding:13px 11px;min-height:105px;cursor:pointer}
+.era:hover,.era.active{border-color:#d2a2a2;background:#fffaf8}
+.era b{font:600 8px var(--sans);color:var(--red);letter-spacing:1px}
+.era h4{font:500 15px var(--serif);margin:9px 0 4px}
+.era p{font:400 9px/1.25 var(--serif);color:var(--muted);margin:0}
+.detail-panel{margin-top:10px;border:1px solid var(--line);background:#fff;border-radius:5px;padding:20px;display:none}
+.detail-panel.show{display:block}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.detail-panel h4{font:500 20px var(--serif);margin:0 0 8px}
+.detail-panel ul{font:400 11px/1.5 var(--serif);color:var(--muted);margin:8px 0;padding-left:18px}
+
+.math-story{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:10px}
+.story-step{border:1px solid var(--line);background:#fff;border-radius:5px;padding:14px}
+.story-step.active{border-color:#c6292e;background:#fffaf8}
+.story-step span{font:600 7px var(--sans);color:var(--red);letter-spacing:1px}
+.story-step b{display:block;font:500 16px var(--serif);margin:4px 0}
+.formula{font:500 21px/1.15 var(--serif);padding:12px 10px;background:#fbf7f4;border-left:2px solid var(--red);margin:8px 0;overflow:auto}
+.explain{font:400 11px/1.4 var(--serif);color:var(--muted);margin:0}
+.controls{display:flex;align-items:center;gap:10px;margin-top:11px}
+.controls label{font:500 8px var(--sans);letter-spacing:.8px;color:#697078}
+.controls input{accent-color:var(--red);flex:1}
+.step{min-width:50px;text-align:center;font:600 9px var(--sans);color:var(--red)}
+
+.math-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:10px}
+.math-card{border:1px solid var(--line);background:#fff;border-radius:5px;padding:18px}
+.math-card h4{font:500 18px var(--serif);margin:0 0 7px}
+
+.pipeline{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.pipe{border:1px solid var(--line);background:#fff;padding:12px 8px;text-align:center;min-height:92px;position:relative;cursor:pointer}
+.pipe:not(:last-child):after{content:'→';position:absolute;right:-10px;top:36px;color:var(--red);z-index:2}
+.pipe b{font:600 7px var(--sans);letter-spacing:1px;color:#70777d}
+.pipe span{display:block;font:500 14px var(--serif);margin-top:12px}
+.pipe small{display:block;font:400 8px/1.2 var(--serif);color:var(--muted);margin-top:5px}
+.pipeline-caption{font:400 12px/1.4 var(--serif);color:var(--muted);background:#fff;border:1px solid var(--line);padding:12px 16px;border-radius:4px;margin-top:8px}
+
+.model-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.model-card{border:1px solid var(--line);background:#fff;border-radius:5px;padding:15px;min-height:205px;cursor:pointer}
+.model-card:hover,.model-card.active{border-color:#d3a2a2;background:#fffaf8}
+.model-top{display:flex;justify-content:space-between}
+.model-tag{font:600 7px var(--sans);letter-spacing:1.5px;color:var(--red)}
+.model-card h4{font:500 21px var(--serif);margin:15px 0 5px}
+.model-card p{font:400 10px/1.35 var(--serif);color:var(--muted);margin:0}
+.model-eq{font:500 14px var(--serif);margin-top:15px;color:#30383f}
+
+.case-tabs{display:flex;gap:6px;margin-bottom:8px}
+.case-tab{padding:6px 14px;border:1px solid var(--line);background:#fff;border-radius:3px;font:600 8px var(--sans);cursor:pointer}
+.case-tab.active{background:var(--red);color:#fff;border-color:var(--red)}
+.case-panel{border:1px solid var(--line);background:#fff;border-radius:5px;padding:18px;display:grid;grid-template-columns:1.3fr .7fr;gap:20px}
+.case-chart{min-height:200px}
+.case-copy .label{font:600 7px var(--sans);letter-spacing:1.5px;color:var(--red)}
+.case-copy h4{font:500 20px var(--serif);margin:8px 0 4px}
+.case-copy p{font:400 11px/1.35 var(--serif);color:var(--muted);margin:0 0 10px}
+.case-math{font:500 14px var(--serif);background:#fbf7f4;padding:8px;border-left:2px solid var(--red);margin:10px 0}
+.impact-line{height:28px;background:#f5efec;position:relative;overflow:hidden;border-radius:3px;display:flex;align-items:center}
+.impact-line i{display:block;height:100%;background:var(--red);opacity:.75;transition:width 1s ease}
+.impact-line span{position:absolute;left:10px;font:600 7px var(--sans);letter-spacing:1px;color:#444;z-index:2}
+
+.dataset-tabs{display:flex;gap:6px;margin-bottom:8px}
+.forecast-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chart-card{border:1px solid var(--line);background:#fff;border-radius:5px;padding:15px}
+.chart-card h4{font:500 18px var(--serif);margin:0 0 3px}
+.chart-card p{font:400 9px var(--sans);color:var(--muted);margin:0 0 10px}
+.chart{height:220px;width:100%}
+.legend{display:flex;gap:15px;font:500 8px var(--sans);color:#747c82;margin-top:5px}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#c6292e;margin-right:4px}
+.dot.gray{background:#9b9b9b}
+.dot.light{background:#d9d0cb}
+.mini-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+.mini-metrics div b{display:block;font:600 8px var(--sans);color:var(--muted)}
+.mini-metrics div span{font:500 16px var(--serif);color:var(--red)}
+
+.lab-controls{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.lab-output{display:grid;grid-template-columns:1.4fr .6fr;gap:12px}
+.inspector{background:#fbf7f4;padding:14px;border:1px solid var(--line);border-radius:4px}
+.inspector b{font:600 7px var(--sans);letter-spacing:1px;color:var(--red)}
+.inspector pre{font:400 10px/1.5 monospace;white-space:pre-wrap;color:#515a61}
+
+.dynamics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.dynamics-stage{background:#fff;border:1px solid var(--line);border-radius:5px;padding:16px}
+#dynamicsStatus{font:500 11px var(--serif);color:var(--muted);margin-top:8px;text-align:center}
+
+.research-bridge{background:var(--red-soft);border-radius:5px;padding:20px;display:grid;grid-template-columns:1fr 2fr;gap:20px}
+.research-bridge h3{font:500 23px var(--serif);margin:0}
+.research-bridge p{font:400 12px/1.35 var(--serif);color:#646d74;margin:0}
+.research-chain{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font:600 8px var(--sans);letter-spacing:1px;color:var(--red);margin-top:12px}
+.research-chain b{color:#999}
+
+.refs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ref{border-top:1px solid var(--line);padding-top:10px}
+.ref b{font:500 13px var(--serif)}
+.ref span{display:block;font:400 8px var(--sans);color:var(--muted);margin-top:4px}
+
+@media(max-width:900px){
+  .ts-hero,.prompt-cmp-grid,.math-grid,.forecast-grid,.detail-grid,.lab-output,.research-bridge,.case-panel{grid-template-columns:1fr}
+  .timeline{grid-template-columns:repeat(3,1fr)}.pipeline{grid-template-columns:repeat(4,1fr)}.model-grid{grid-template-columns:1fr 1fr}
+  .pipe:not(:last-child):after{display:none}
+}
+@media(max-width:620px){
+  .ts-hero-copy h2{font-size:42px}.gr-article-title{font-size:32px}.timeline,.pipeline,.model-grid,.dynamics-grid,.math-story{grid-template-columns:1fr}
+  .ts-visual{min-height:240px}.ts-head{display:block}.ts-head p{margin-top:5px}
+}
+</style></head><body><div class="site">
+
+<!-- Global Kairos Header -->
+<header>
+  <div class="brand">
+    <a class="logo" href="#" onclick="showHome()">Kairos<small>RESEARCH LAB</small></a>
+    <div class="tagline">Ideas. Research. Real Impact.</div>
+  </div>
+  <nav class="nav">
+    <a class="active" href="#" onclick="showHome()">Home</a>
+    <a href="#research" onclick="showHome()">Research</a>
+    <a href="#research" onclick="showHome()">Articles</a>
+    <a href="#research" onclick="showHome()">Topics</a>
+    <a href="#about" onclick="showHome()">About</a>
+  </nav>
+  <div class="actions">
+    <button class="search" aria-label="Search">⌕</button>
+    <button class="cta">Subscribe</button>
+  </div>
+</header>
+
+<!-- Home View -->
+<main id="homeView" class="view active">
+  <section class="hero">
+    <div class="hero-art">
+      <svg viewBox="0 0 600 500" preserveAspectRatio="xMidYMid slice">
+        <rect width="600" height="500" fill="#eee5df"/>
+        <path d="M0 390 C90 320 120 400 205 335 S330 290 405 345 S510 300 600 355 V500 H0Z" fill="#d8ccc5"/>
+        <path d="M0 425 C110 360 160 450 260 390 S410 365 600 405 V500 H0Z" fill="#c9bbb3"/>
+        <g fill="none" stroke="#b9a7a0" stroke-width="2" opacity=".7">
+          <path d="M20 120 C90 60 145 165 215 105 S350 50 430 120 S520 170 590 100"/>
+          <path d="M20 150 C90 90 145 195 215 135 S350 80 430 150 S520 200 590 130"/>
+        </g>
+        <circle cx="420" cy="210" r="104" fill="none" stroke="#c6292e" stroke-width="2" opacity=".75"/>
+        <circle cx="420" cy="210" r="78" fill="none" stroke="#c6292e" stroke-width="1" opacity=".45"/>
+        <g fill="#c6292e">
+          <circle cx="420" cy="210" r="5"/>
+          <circle cx="347" cy="161" r="3"/>
+          <circle cx="492" cy="174" r="3"/>
+          <circle cx="475" cy="274" r="3"/>
+        </g>
+        <g stroke="#5e666d" stroke-width="3" fill="none" stroke-linecap="round">
+          <path d="M375 270 l22 -55 18 30 20 -48 18 42 28 -26"/>
+          <path d="M390 302 l58 0"/>
+        </g>
+      </svg>
+    </div>
+    <div class="hero-overlay"></div>
+    <div class="hero-side">PERCEPTION<br>REASONING<br>PLANNING<br>ACTION<br>FOR A MORE<br>CAPABLE WORLD</div>
+    <div class="hero-copy">
+      <div class="eyebrow"><span class="rule"></span>RESEARCH AT THE FRONTIER</div>
+      <h1>From Understanding<br>the World to <em>Shaping It.</em></h1>
+      <p>Researching models that learn structure in evolving systems — from time series foundation models to world models and embodied intelligence.</p>
+      <div class="hero-buttons">
+        <a class="btn primary" href="#research">Explore Research →</a>
+        <button class="btn secondary" onclick="openTimeSeries()">Time Series Foundation Models</button>
+      </div>
+      <div class="metrics">
+        <div class="metric"><b>3</b><span>Research Focus</span></div>
+        <div class="metric"><b>10+</b><span>Research Projects</span></div>
+        <div class="metric"><b>25+</b><span>Research Articles</span></div>
+        <div class="metric"><b>1</b><span>Interactive Lab</span></div>
+      </div>
+    </div>
+    <div class="hero-caption">Mathematics, models<br>and real-world impact.</div>
+  </section>
+
+  <!-- #research section -->
+  <section class="section" id="research">
+    <div class="section-head">
+      <div class="section-title">Research Focus</div>
+      <a class="section-link" href="#research">Explore all topics →</a>
+    </div>
+    <div class="focus-grid">
+      <!-- Card 01: Time Series Foundation Models -->
+      <article class="focus-card" onclick="openTimeSeries()" tabindex="0" style="border-color: #d89b9d; box-shadow: 0 4px 14px rgba(198, 41, 46, 0.08);">
+        <div class="focus-num" style="color: var(--red); font-weight: 700;">01 · FEATURED ARTICLE & LAB</div>
+        <div class="focus-art">
+          <svg width="100%" height="90" viewBox="0 0 330 90">
+            <g fill="none" stroke="#d98b8d" stroke-width="1.2">
+              <path d="M0 52 C35 10 60 78 100 38 S160 8 195 45 S250 80 330 22"/>
+              <path opacity=".45" d="M0 64 C35 22 60 90 100 50 S160 20 195 57 S250 92 330 34"/>
+            </g>
+            <circle cx="195" cy="45" r="4" fill="#c6292e"/>
+            <text x="205" y="48" font-family="Inter" font-size="8" fill="#c6292e" font-weight="600">FEW-SHOT LEARNERS</text>
+          </svg>
+        </div>
+        <h2 style="color: var(--red);">Time Series Foundation Models</h2>
+        <p>Google Research: Time series foundation models can be few-shot learners, plus interactive mathematical lab.</p>
+        <div class="arrow" style="font-weight: 700;">Open Chapter →</div>
+      </article>
+
+      <!-- Card 02: World Models -->
+      <article class="focus-card">
+        <div class="focus-num">02</div>
+        <div class="focus-art">
+          <svg width="100%" height="90" viewBox="0 0 330 90">
+            <g fill="none" stroke="#c9c5c0">
+              <ellipse cx="165" cy="45" rx="110" ry="35"/>
+              <ellipse cx="165" cy="45" rx="80" ry="27"/>
+              <ellipse cx="165" cy="45" rx="48" ry="17"/>
+            </g>
+            <g fill="#C6292E">
+              <circle cx="92" cy="42" r="2"/>
+              <circle cx="143" cy="54" r="2"/>
+              <circle cx="195" cy="57" r="2"/>
+              <circle cx="248" cy="50" r="2"/>
+            </g>
+          </svg>
+        </div>
+        <h2>World Models</h2>
+        <p>Learning structured representations of complex systems, environments and evolving states.</p>
+        <div class="arrow">→</div>
+      </article>
+
+      <!-- Card 03: Vision-Language-Action -->
+      <article class="focus-card">
+        <div class="focus-num">03</div>
+        <div class="focus-art">
+          <svg width="100%" height="90" viewBox="0 0 330 90">
+            <g fill="none" stroke="#d9a1a2">
+              <path d="M110 27 155 8l45 19-45 19z"/>
+              <path d="M110 27v32l45 20V46z"/>
+              <path d="M200 27v32l-45 20"/>
+            </g>
+            <rect x="148" y="17" width="14" height="14" fill="#C6292E" opacity=".2"/>
+          </svg>
+        </div>
+        <h2>Vision-Language-Action</h2>
+        <p>Connecting perception, language, reasoning and action for embodied intelligence.</p>
+        <div class="arrow">→</div>
+      </article>
+    </div>
+  </section>
+
+  <section class="section" id="about">
+    <div class="mission">
+      <h2>Our Mission</h2>
+      <p>Make complex scientific and real-world processes understandable by connecting data, mathematics, learned representations and controlled experiments.</p>
+    </div>
+  </section>
+
+  <section class="section" id="featured">
+    <div class="section-head">
+      <div class="section-title">Featured Research</div>
+      <a class="section-link" href="#research">View all →</a>
+    </div>
+    <div class="feature-grid">
+      <article class="feature" onclick="openTimeSeries()" style="cursor: pointer;">
+        <div class="feature-copy">
+          <div class="label">RESEARCH · TIME SERIES FOUNDATION MODELS</div>
+          <h2>Time Series Foundation Models Can Be Few-Shot Learners</h2>
+          <p>Google Research: In-Context Fine-Tuning enables zero-gradient few-shot adaptation matching supervised fine-tuning across 23 benchmarks.</p>
+        </div>
+        <div class="feature-image">
+          <div style="padding:22px;font:500 26px var(--serif);color:#665b56">IN-CONTEXT<br>→<br>SEPARATORS<br>→<br>FORECAST</div>
+        </div>
+      </article>
+      <div class="news">
+        <div class="news-row" onclick="openTimeSeries()" style="cursor: pointer;">
+          <div class="news-date">SEP 2025</div>
+          <div>
+            <h3>TimesFM: In-Context Fine-Tuning</h3>
+            <p>ICML 2025 · Google Research</p>
+          </div>
+        </div>
+        <div class="news-row">
+          <div class="news-date">SEP 2026</div>
+          <div>
+            <h3>From trajectories to low-dimensional structure</h3>
+            <p>Research note · dynamical systems</p>
+          </div>
+        </div>
+        <div class="news-row">
+          <div class="news-date">SEP 2026</div>
+          <div>
+            <h3>Controlled systems as a model laboratory</h3>
+            <p>Research note · WAM</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="logo">Kairos<small>RESEARCH LAB</small></div>
+    <div class="footer-tag">Ideas, research and models for a more capable future.</div>
+    <div class="footer-nav">
+      <a href="#" onclick="showHome()">Home</a>
+      <a href="#research">Research</a>
+      <a href="#featured">Articles</a>
+      <a href="#about">About</a>
+    </div>
+  </footer>
+</main>
+
+<!-- Time Series Chapter View (Opened when clicking Time Series Foundation Models) -->
+<section id="timeSeriesView" class="view">
+  <div class="ts-page">
+    
+    <!-- Navigation bar inside Chapter -->
+    <div class="ts-page-nav-bar">
+      <a class="back" href="#" onclick="showHome()">← Back to Research Focus (#research)</a>
+      <div class="view-mode-tabs">
+        <button class="view-mode-btn active" id="btnModeGoogle" onclick="switchChapterMode('google')">Few-Shot Research (Google)</button>
+        <button class="view-mode-btn" id="btnModeLab" onclick="switchChapterMode('lab')">Interactive Math & Dynamics Lab</button>
+        <a href="http://localhost:8088/" target="_blank" class="view-mode-btn" style="text-decoration:none; display:inline-flex; align-items:center; gap:5px; color: var(--red); font-weight:600;">Full TSFM Platform (Port 8088) ↗</a>
+      </div>
+    </div>
+
+    <!-- Mode A: Google Research Blog Feature -->
+    <div id="chapterGoogleMode">
+      <article class="gr-article-wrapper">
+        <div class="gr-meta-tag">Google Research · In-Context Fine-Tuning · ICML 2025</div>
+        <h1 class="gr-article-title">Time series foundation models can be few-shot learners</h1>
+        <div class="gr-byline">
+          <span>September 23, 2025</span>
+          <span class="dot"></span>
+          <span>Rajat Sen, Research Scientist, and Yichen Zhou, Software Engineer, Google Research</span>
+          <span class="dot"></span>
+          <span style="color: var(--red); font-weight: 500;">TimesFM-ICF</span>
+        </div>
+
+        <div class="gr-summary-box">
+          We present a novel approach to time-series forecasting that uses continued pre-training to teach a time-series foundation model to adapt to in-context examples at inference time.
+        </div>
+
+        <p class="gr-body-p">
+          <a href="https://en.wikipedia.org/wiki/Time_series" target="_blank" style="color: var(--red); text-decoration: underline;">Time-series forecasting</a> is essential for modern businesses, helping them predict everything from inventory needs to energy demands. Traditionally, this has involved building a separate, specialized model for each task — a process that is slow and requires significant expertise.
+        </p>
+
+        <p class="gr-body-p">
+          The emergence of <a href="https://en.wikipedia.org/wiki/Zero-shot_learning" target="_blank" style="color: var(--red); text-decoration: underline;">zero-shot learning</a> offered a solution. Our previous model, <a href="https://research.google/blog/a-decoder-only-foundation-model-for-time-series-forecasting/" target="_blank" style="color: var(--red); text-decoration: underline;">TimesFM</a>, was a zero-shot, pre-trained foundation model that could accurately forecast without task-specific training. But what if a few examples could make the forecast even better? For instance, forecasting highway traffic would be more accurate if the model could consider data from other nearby highways or from the same highway a few weeks ago. The standard solution, supervised fine-tuning, which uses curated data to fine-tune an existing model, reintroduces the complexity one hopes to avoid with zero-shot learning.
+        </p>
+
+        <p class="gr-body-p">
+          In our work, "<strong>In-Context Fine-Tuning for Time-Series Foundation Models</strong>", presented at <a href="https://icml.cc/virtual/2025/poster/43707" target="_blank" style="color: var(--red); text-decoration: underline;">ICML 2025</a>, we introduce a novel approach that transforms TimesFM into a <strong>few-shot learner</strong>. This method uses continued pre-training to teach the model how to learn from a handful of examples at inference time. The result is a powerful new capability that matches the performance of supervised fine-tuning without requiring additional complex training from the user.
+        </p>
+
+        <!-- Figure 1: Comparison of Prompting -->
+        <div class="gr-fig-card">
+          <div class="gr-fig-body">
+            <div class="prompt-cmp-grid">
+              
+              <!-- Left: LLM Prompting -->
+              <div class="prompt-cmp-box">
+                <h5>Few-Shot Prompting of an LLM</h5>
+                <div class="prompt-code">
+                  <strong>Example 1:</strong> "Battery lasts 3 days." → <span style="color:#1b5e20;">Positive</span><br>
+                  <strong>Example 2:</strong> "Broke on arrival." → <span style="color:#b71c1c;">Negative</span><br>
+                  <strong>Target:</strong> "Display is crisp." → <span style="color:var(--red);font-weight:bold;">[Predict: Positive]</span>
+                </div>
+                <div style="font: 400 11px var(--serif); color: var(--muted);">Language tokens prompt in-context classification without parameter updates.</div>
+              </div>
+
+              <!-- Right: Time-Series Prompting -->
+              <div class="prompt-cmp-box">
+                <h5>Few-Shot Prompting of a Time-Series FM</h5>
+                <div class="prompt-code">
+                  <strong>Store 1:</strong> History [140, 145] → Forecast [155, 162]<br>
+                  <div style="color:var(--red);font-weight:700;margin:3px 0;">✦ [COMMON SEPARATOR TOKEN] ✦</div>
+                  <strong>Target:</strong> History [85, 90] → <span style="color:var(--red);font-weight:bold;">[Predict: 98, 105]</span>
+                </div>
+                <div style="font: 400 11px var(--serif); color: var(--muted);">In-context time series examples condition the decoder without gradient fine-tuning.</div>
+              </div>
+
+            </div>
+          </div>
+          <div class="gr-fig-caption">
+            Figure 1: Similar to few-shot prompting of an LLM (left), a time-series foundation model should support few-shot prompting with an arbitrary number of related in-context time series examples (right).
+          </div>
+        </div>
+
+        <h3 class="gr-subhead">Redesigning the model & The Common Separator Token</h3>
+
+        <p class="gr-body-p">
+          TimesFM is a patched decoder that tokenizes every 32 contiguous timepoints (a patch) as an input token and applies a transformer stack on top of the sequence of input tokens to generate output tokens. It then applies a shared multilayer perceptron (MLP) to translate each output token back to a time series of 128 timepoints.
+        </p>
+
+        <p class="gr-body-p">
+          To create <strong>TimesFM-ICF (In-Context Fine-tuning)</strong>, we start with the base TimesFM model and continue pre-training with new context: the forecast history plus all in-context examples. The first step is to make sure the model doesn’t confuse or conflate the forecasting history and the in-context examples. Imagine you're giving the model a list of numbers that represent a few different things, maybe sunglasses sales figures from one store, then umbrella sales figures from another. If you just merge all those numbers together, the model might get confused, thinking it's one continuous stream of data.
+        </p>
+
+        <p class="gr-body-p">
+          To fix this, we put a special, learnable “common separator token” — like a digital "stop sign" or a "new paragraph" symbol — after each set of numbers. With these separators in place, as soon as the model attends to the separator token of an example it has seen before, it won't mix it up with the data it's currently trying to predict.
+        </p>
+
+        <!-- Figure 2: Interactive Separator Simulation -->
+        <div class="gr-fig-card">
+          <div class="gr-fig-body">
+            <div class="sim-control-strip">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font: 600 9px var(--sans); letter-spacing: 1px; color: #666; text-transform: uppercase;">In-Context Shots:</span>
+                <div class="shot-btn-group">
+                  <button class="shot-btn" data-shots="0" onclick="setShots(0, this)">0-Shot (Base)</button>
+                  <button class="shot-btn" data-shots="1" onclick="setShots(1, this)">1-Shot</button>
+                  <button class="shot-btn active" data-shots="3" onclick="setShots(3, this)">3-Shot</button>
+                  <button class="shot-btn" data-shots="5" onclick="setShots(5, this)">5-Shot</button>
+                </div>
+              </div>
+
+              <label style="display: flex; align-items: center; gap: 8px; font: 500 11px var(--sans); cursor: pointer;">
+                <input type="checkbox" id="kairosSepToggle" checked onchange="toggleSep(this.checked)" style="accent-color: var(--red); width: 15px; height: 15px;">
+                <span>Common Separator Tokens [SEP]</span>
+              </label>
+            </div>
+
+            <div class="canvas-box">
+              <canvas id="fewShotCanvas"></canvas>
+            </div>
+
+            <div class="stream-tokens-strip" id="kairosTokenStrip">
+              <!-- Tokens injected via JS -->
+            </div>
+
+            <div style="margin-top: 12px; background: #faf7f4; border: 1px solid var(--line); border-radius: 4px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <span style="font: 600 8px var(--sans); color: var(--muted); letter-spacing: 1px; text-transform: uppercase;">Normalized Relative Error:</span>
+                <div id="kairosMetricError" style="font: 600 15px var(--mono); color: var(--red); margin-top: 2px;">0.934 (6.6% improvement)</div>
+              </div>
+              <div id="kairosMetricNote" style="font: 400 12px var(--serif); color: #555; text-align: right;">
+                Matches supervised fine-tuning (TimesFM-FT: 0.932) with 0 gradient steps!
+              </div>
+            </div>
+          </div>
+          <div class="gr-fig-caption">
+            Figure 2: Interactive simulation — Concatenating in-context examples without separators confuses the model into predicting erratic jagged oscillations. Toggle the separator tokens above to inspect causal self-attention.
+          </div>
+        </div>
+
+        <h3 class="gr-subhead">Testing the model & Empirical Benchmark</h3>
+
+        <p class="gr-body-p">
+          We evaluated TimesFM-ICF on <strong>23 datasets</strong> that the model had never seen during any phase of its training. Each dataset in this benchmark has multiple time series. When we forecast a time series, we start with its immediate history, then sample sequences from its full history and the histories of other time series in the same dataset as in-context examples.
+        </p>
+
+        <!-- Figure 3: Benchmark Chart -->
+        <div class="gr-fig-card">
+          <div class="gr-fig-body">
+            <div class="bar-chart-card">
+              <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--line); padding-bottom: 6px; font: 500 12px var(--serif);">
+                <span>Geometric Mean Normalized MASE across 23 Datasets (Lower is Better)</span>
+                <span style="font: 500 10px var(--mono); color: var(--muted);">ICML 2025</span>
+              </div>
+
+              <div class="bar-chart-row">
+                <div class="bar-row-label">TimesFM (Base)</div>
+                <div class="bar-track"><div class="bar-prog bar-base" style="width: 100%;">1.000</div></div>
+                <div class="bar-score">1.000</div>
+              </div>
+
+              <div class="bar-chart-row">
+                <div class="bar-row-label">TimesFM-FT (Supervised)</div>
+                <div class="bar-track"><div class="bar-prog bar-ft" style="width: 93.2%;">0.932</div></div>
+                <div class="bar-score" style="color: #415462;">0.932</div>
+              </div>
+
+              <div class="bar-chart-row">
+                <div class="bar-row-label"><strong>TimesFM-ICF (Few-Shot)</strong></div>
+                <div class="bar-track"><div class="bar-prog bar-icf" style="width: 93.4%;">0.934</div></div>
+                <div class="bar-score" style="color: var(--red);">0.934</div>
+              </div>
+            </div>
+          </div>
+          <div class="gr-fig-caption">
+            Figure 3: TimesFM-ICF improves performance by 6.8% over TimesFM (Base) and achieves the exact same performance as TimesFM-FT without running supervised fine-tuning.
+          </div>
+        </div>
+
+        <p class="gr-body-p">
+          TimesFM-ICF is <strong>6.8% more accurate</strong> than TimesFM (Base). What’s more surprising and inspiring is that it matches the performance of TimesFM-FT without the hassle of running supervised fine-tuning.
+        </p>
+
+        <div class="source-strip">
+          <a href="https://icml.cc/virtual/2025/poster/43707" target="_blank">ICML 2025 Poster #43707 ↗</a>
+          <a href="https://github.com/google-research/timesfm" target="_blank">Google TimesFM Repository ↗</a>
+          <a href="https://huggingface.co/google/timesfm-1.0-200m" target="_blank">Hugging Face Checkpoints ↗</a>
+          <a href="#" onclick="switchChapterMode('lab'); return false;">Open Mathematical Simulation Lab ↓</a>
+        </div>
+      </article>
+    </div>
+
+    <!-- Mode B: Kairos Interactive Mathematical & Dynamics Lab -->
+    <div id="chapterLabMode">
+      <div class="ts-hero">
+        <div class="ts-hero-copy">
+          <div class="eyebrow"><span class="rule"></span>TIME SERIES FOUNDATION MODELS · INTERACTIVE LAB</div>
+          <h2>From forecasting<br>to <em>learning time.</em></h2>
+          <p>Do not just read about a time-series foundation model. Watch a signal become patches, embeddings, attention weights, latent state and finally a forecast distribution.</p>
+          <div class="hero-note">
+            <b>2023 → 2026</b>
+            <span>Foundation models move from single-series forecasting toward multivariate, covariate-aware and reusable temporal representations.</span>
+          </div>
+          <div class="chapter-nav">
+            <button class="chip active" onclick="jump('evolution')">Evolution</button>
+            <button class="chip" onclick="jump('math')">Mathematics</button>
+            <button class="chip" onclick="jump('models')">Latest models</button>
+            <button class="chip" onclick="jump('cases')">Use cases</button>
+            <button class="chip" onclick="jump('forecast')">Forecast lab</button>
+            <button class="chip" onclick="jump('dynamics')">Dynamics</button>
+          </div>
+        </div>
+        <div class="ts-visual">
+          <div class="visual-label">THE CORE IDEA</div>
+          <svg id="coreSvg" viewBox="0 0 620 320" style="width:100%;height:280px;margin-top:10px">
+            <path d="M25 225 C85 160 105 250 160 185 S255 105 315 175 S390 250 455 145 S535 110 595 65" fill="none" stroke="#c6292e" stroke-width="2"/>
+            <path d="M25 255 C85 190 105 280 160 215 S255 135 315 205 S390 280 455 175 S535 140 595 95" fill="none" stroke="#d9c8c2" stroke-width="1"/>
+            <g fill="#c6292e">
+              <circle cx="160" cy="185" r="4"/>
+              <circle cx="315" cy="175" r="4"/>
+              <circle cx="455" cy="145" r="4"/>
+            </g>
+            <g font-family="Inter" font-size="11" fill="#6d6762">
+              <text x="24" y="35">OBSERVE</text>
+              <text x="195" y="35">REPRESENT</text>
+              <text x="380" y="35">ATTEND</text>
+              <text x="535" y="35">FORECAST</text>
+            </g>
+            <g font-family="Cormorant Garamond" font-size="22" fill="#2d2926">
+              <text x="24" y="295">x₁ … xₜ</text>
+              <text x="205" y="295">patches → zᵢ</text>
+              <text x="390" y="295">Q K V</text>
+              <text x="535" y="295">pθ(y)</text>
+            </g>
+          </svg>
+          <div class="visual-caption">Mathematics is the interface: every transformation can be inspected.</div>
+        </div>
+      </div>
+
+      <!-- Section 01: Evolution -->
+      <section class="ts-section" id="evolution">
+        <div class="ts-head">
+          <h3>01 · From statistical forecasting to foundation models</h3>
+          <p>Each era changes what the model is allowed to learn — from explicit coefficients to reusable pretrained temporal priors.</p>
+        </div>
+        <div class="timeline">
+          <div class="era active" onclick="selectEra(this,'Explicit dependence','AR / MA')"><b>1950s–70s</b><h4>AR / MA</h4><p>Coefficients describe temporal dependence.</p></div>
+          <div class="era" onclick="selectEra(this,'Differencing + autocorrelation','ARIMA')"><b>1970s–2000s</b><h4>ARIMA</h4><p>Trend, stationarity and noise.</p></div>
+          <div class="era" onclick="selectEra(this,'Latent state estimation','State Space')"><b>1980s–2000s</b><h4>State Space</h4><p>Hidden state + observations.</p></div>
+          <div class="era" onclick="selectEra(this,'Learned sequential features','RNN / LSTM')"><b>2010s</b><h4>RNN / LSTM</h4><p>Nonlinear memory.</p></div>
+          <div class="era" onclick="selectEra(this,'Global dependency','Transformers')"><b>2017–22</b><h4>Transformers</h4><p>Attention over context.</p></div>
+          <div class="era" onclick="selectEra(this,'Pretraining across series','TSFMs')"><b>2023+</b><h4>TSFMs</h4><p>Transferable temporal priors.</p></div>
+        </div>
+        <div id="eraExplain" class="detail-panel show">
+          <div class="detail-grid">
+            <div>
+              <h4>Explicit dependence</h4>
+              <div class="formula">xₜ = c + φ₁xₜ₋₁ + ··· + φₚxₜ₋ₚ + εₜ</div>
+            </div>
+            <div>
+              <p class="explain">The key transition is representational. Classical models specify dependency structure; neural sequence models learn it; foundation models learn reusable priors across diverse domains.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 02: Mathematics -->
+      <section class="ts-section" id="math">
+        <div class="ts-head">
+          <h3>02 · Make the heavy mathematics visible</h3>
+          <p>Move the controls. Visually transform observations into the objects a model computes.</p>
+        </div>
+        <div class="math-story">
+          <div class="story-step active">
+            <span>01</span><b>Normalize</b>
+            <div class="formula">x′ₜ = (xₜ − μ) / σ</div>
+            <p class="explain">Remove scale differences while retaining shape.</p>
+            <div class="controls">
+              <label>STANDARDIZATION</label>
+              <input type="range" min="0" max="100" value="55" oninput="mathMove(this.value)">
+              <span class="step" id="mathStep">55%</span>
+            </div>
+          </div>
+          <div class="story-step">
+            <span>02</span><b>Patch</b>
+            <div class="formula">pᵢ ∈ ℝᴾ → zᵢ = Wₑpᵢ + bₑ</div>
+            <p class="explain">Group contiguous observations (N ≈ T/P).</p>
+            <div class="controls">
+              <label>PATCH SIZE</label>
+              <input type="range" min="4" max="32" value="16" oninput="patchMove(this.value)">
+              <span class="step" id="patchVal">16</span>
+            </div>
+          </div>
+          <div class="story-step">
+            <span>03</span><b>Attend</b>
+            <div class="formula">A = softmax(QKᵀ / √dₖ)</div>
+            <p class="explain">Similarity becomes a probability mixing matrix.</p>
+            <div class="controls">
+              <label>FOCUS TOKEN</label>
+              <input type="range" min="0" max="8" value="4" oninput="attentionMove(this.value)">
+              <span class="step" id="focusVal">4</span>
+            </div>
+          </div>
+        </div>
+        <div class="math-grid">
+          <div class="math-card">
+            <h4>Transformer block</h4>
+            <div class="formula">Q = ZWQ, K = ZWK, V = ZWV<br>A = softmax(QKᵀ/√dₖ)<br>O = AV<br>Y = X′ + FFN(LN(X′))</div>
+            <p class="explain">Tensor shapes beside each equation reveal the operational rank.</p>
+          </div>
+          <div class="math-card">
+            <h4>Attention as a moving dependency map</h4>
+            <svg id="attention" viewBox="0 0 360 220" style="width:100%;height:210px"></svg>
+            <p class="micro" style="font: 400 9px var(--sans); color: var(--muted); margin-top: 4px;">Rows = querying patches · columns = context patches · opacity = attention weight</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 03: Pipeline -->
+      <section class="ts-section">
+        <div class="ts-head">
+          <h3>03 · The foundation-model pipeline</h3>
+          <p>Equation → representation → model state → probabilistic forecast.</p>
+        </div>
+        <div class="pipeline">
+          <div class="pipe" onclick="tensor('input')"><b>01</b><span>Observe</span><small>x₁…xₜ</small></div>
+          <div class="pipe" onclick="tensor('patches')"><b>02</b><span>Patch</span><small>N ≈ T/P</small></div>
+          <div class="pipe" onclick="tensor('embed')"><b>03</b><span>Embed</span><small>ℝᴾ → ℝᵈ</small></div>
+          <div class="pipe" onclick="tensor('attention')"><b>04</b><span>Attend</span><small>Q,K,V</small></div>
+          <div class="pipe" onclick="tensor('latent')"><b>05</b><span>Represent</span><small>hₜ</small></div>
+          <div class="pipe" onclick="tensor('forecast')"><b>06</b><span>Decode</span><small>ŷₜ₊₁:ₜ₊H</small></div>
+          <div class="pipe" onclick="tensor('uncertainty')"><b>07</b><span>Quantify</span><small>q₀.₁…q₀.₉</small></div>
+        </div>
+        <div class="pipeline-caption">
+          <b>What changes with a foundation model?</b> Pretrained across millions of series, context is used at inference to retrieve learned temporal structure without training from scratch.
+        </div>
+      </section>
+
+      <!-- Section 04: Latest Models -->
+      <section class="ts-section" id="models">
+        <div class="ts-head">
+          <h3>04 · The latest model landscape</h3>
+          <p>Three primary foundation model families for reusable temporal intelligence.</p>
+        </div>
+        <div class="model-grid">
+          <div class="model-card active" onclick="modelInfo('TimesFM',this)">
+            <div class="model-top"><span class="model-tag">GOOGLE RESEARCH · 2026</span><span>01</span></div>
+            <h4>TimesFM 3.0</h4>
+            <p>Decoder-only foundation model with native univariate/multivariate and past/future covariate support.</p>
+            <div class="model-eq">pθ(x<sub>T+1:T+H</sub> | x<sub>1:T</sub>, c)</div>
+          </div>
+          <div class="model-card" onclick="modelInfo('Chronos',this)">
+            <div class="model-top"><span class="model-tag">AMAZON SCIENCE · 2025+</span><span>02</span></div>
+            <h4>Chronos-2</h4>
+            <p>Extends value tokenization to zero-shot multivariate and covariate-informed probabilistic forecasting.</p>
+            <div class="model-eq">values → tokens → Transformer</div>
+          </div>
+          <div class="model-card" onclick="modelInfo('Moirai',this)">
+            <div class="model-top"><span class="model-tag">SALESFORCE · 2025</span><span>03</span></div>
+            <h4>Moirai 2.0</h4>
+            <p>Sparse decoder-only architecture trained with expanded multi-domain and synthetic datasets.</p>
+            <div class="model-eq">context → decoder → p(future)</div>
+          </div>
+        </div>
+        <div id="modelDetail" class="detail-panel show">
+          <div class="detail-grid">
+            <div>
+              <h4>TimesFM 3.0 · what changed</h4>
+              <ul>
+                <li>Native multivariate + univariate forecasting.</li>
+                <li>In-Context Fine-Tuning (ICF) enables few-shot domain adaptation.</li>
+                <li>Zero-shot generalist forecasting with quantile uncertainty.</li>
+              </ul>
+            </div>
+            <div>
+              <h4>Interactive experiment</h4>
+              <ol>
+                <li>Choose bundled dataset.</li>
+                <li>Select context window & horizon.</li>
+                <li>Inspect point predictions & quantiles.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 05: Three Cases -->
+      <section class="ts-section" id="cases">
+        <div class="ts-head">
+          <h3>05 · Three cases: same mathematics, different decisions</h3>
+          <p>Click a case to inspect how covariates alter planning.</p>
+        </div>
+        <div class="case-tabs">
+          <button class="case-tab active" onclick="selectCase('energy',this)">ENERGY</button>
+          <button class="case-tab" onclick="selectCase('retail',this)">RETAIL</button>
+          <button class="case-tab" onclick="selectCase('mobility',this)">MOBILITY</button>
+        </div>
+        <div id="casePanel" class="case-panel">
+          <div class="case-chart"><svg id="caseChart" viewBox="0 0 620 250"></svg></div>
+          <div class="case-copy">
+            <div class="label" id="caseLabel">CASE 01 · ENERGY</div>
+            <h4 id="caseTitle">Grid load forecasting</h4>
+            <p id="caseText">Forecast next demand window from historical load plus temperature covariates.</p>
+            <div class="case-math" id="caseMath">ŷₜ₊ₕ = fθ(y₁:ₜ, temperature₁:ₜ₊ₕ)</div>
+            <div class="impact-line"><span id="caseImpact">SIGNAL → PLANNING</span><i id="caseImpactBar"></i></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 06: Forecast Lab -->
+      <section class="ts-section" id="forecast">
+        <div class="ts-head">
+          <h3>06 · Forecasting lab — no external dataset required</h3>
+          <p>Deterministic local datasets for zero-shot testing.</p>
+        </div>
+        <div class="dataset-tabs">
+          <button class="chip active" onclick="selectDataset('seasonal',this)">Seasonal demand</button>
+          <button class="chip" onclick="selectDataset('trend',this)">Trend + shocks</button>
+          <button class="chip" onclick="selectDataset('multi',this)">Multivariate system</button>
+        </div>
+        <div class="forecast-grid">
+          <div class="chart-card">
+            <h4 id="datasetTitle">Seasonal demand</h4>
+            <p id="datasetDesc">Synthetic retail-like demand with seasonality and mild noise.</p>
+            <svg id="forecastChart" class="chart" viewBox="0 0 640 250"></svg>
+            <div class="legend">
+              <span><i class="dot"></i>observed</span>
+              <span><i class="dot gray"></i>baseline</span>
+              <span><i class="dot light"></i>uncertainty</span>
+            </div>
+            <div class="controls">
+              <label>HORIZON</label>
+              <input type="range" min="8" max="64" value="32" oninput="forecastMove(this.value)">
+              <span class="step" id="horizonVal">32</span>
+            </div>
+          </div>
+          <div class="chart-card">
+            <h4>Probabilistic forecast</h4>
+            <div class="formula">pθ(y<sub>T+1:T+H</sub> | y<sub>1:T</sub>, c)</div>
+            <p class="explain">A forecast is a distribution, not just a single line. Toggle uncertainty to inspect confidence bands.</p>
+            <button class="chip active" id="uncertaintyBtn" onclick="toggleUncertainty(this)">Show uncertainty</button>
+            <div class="mini-metrics">
+              <div><b>MAE</b><span id="metricMae">—</span></div>
+              <div><b>RMSE</b><span id="metricRmse">—</span></div>
+              <div><b>WQL</b><span id="metricWql">—</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 07: Tensor Inspector -->
+      <section class="ts-section">
+        <div class="ts-head">
+          <h3>07 · Tensor inspector</h3>
+          <p>Click any stage to inspect the shape and meaning of tensors.</p>
+        </div>
+        <div class="lab-controls">
+          <button class="chip active" onclick="tensor('input')">Input</button>
+          <button class="chip" onclick="tensor('patches')">Patches</button>
+          <button class="chip" onclick="tensor('embed')">Embedding</button>
+          <button class="chip" onclick="tensor('attention')">Attention</button>
+          <button class="chip" onclick="tensor('latent')">Latent state</button>
+          <button class="chip" onclick="tensor('forecast')">Forecast</button>
+          <button class="chip" onclick="tensor('uncertainty')">Uncertainty</button>
+        </div>
+        <div class="lab-output">
+          <div><svg id="tensorSvg" viewBox="0 0 700 220" style="width:100%;height:210px"></svg></div>
+          <div class="inspector">
+            <b id="tensorTitle">INPUT TENSOR</b>
+            <pre id="tensorText">shape: [1, 128, 1]\ndtype: float32\nmean: 0.000\nstd: 1.000\nmeaning: observed context</pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 08: Dynamics -->
+      <section class="ts-section" id="dynamics">
+        <div class="ts-head">
+          <h3>08 · The WAM bridge — from time series to latent dynamics</h3>
+          <p>Controlled nonlinear systems as a scientific testbed.</p>
+        </div>
+        <div class="dynamics-grid">
+          <div class="math-card">
+            <span class="label" style="font:600 7px var(--sans);color:var(--red);">KURAMOTO</span>
+            <h4>Collective phase dynamics</h4>
+            <div class="formula">dθᵢ/dt = ωᵢ + Σⱼ Kᵢⱼ sin(θⱼ − θᵢ)</div>
+            <button class="chip" onclick="animateDynamics('kuramoto')">Animate dynamics</button>
+          </div>
+          <div class="math-card">
+            <span class="label" style="font:600 7px var(--sans);color:var(--red);">STUART–LANDAU</span>
+            <h4>Nonlinear oscillatory state</h4>
+            <div class="formula">dzᵢ/dt = (λᵢ+iωᵢ)zᵢ − |zᵢ|²zᵢ + ΣⱼKᵢⱼ(zⱼ−zᵢ)</div>
+            <button class="chip" onclick="animateDynamics('stuart')">Animate dynamics</button>
+          </div>
+          <div class="math-card">
+            <span class="label" style="font:600 7px var(--sans);color:var(--red);">KURAMOTO–SIVASHINSKY</span>
+            <h4>Spatiotemporal chaos</h4>
+            <div class="formula">uₜ + uuₓ + uₓₓ + uₓₓₓₓ = 0</div>
+            <button class="chip" onclick="animateDynamics('ks')">Animate dynamics</button>
+          </div>
+        </div>
+        <div class="dynamics-stage">
+          <svg id="dynamicsSvg" viewBox="0 0 900 220"></svg>
+          <div id="dynamicsStatus">Select a system to animate its trajectory.</div>
+        </div>
+      </section>
+
+      <!-- References -->
+      <section class="ts-section">
+        <div class="ts-head">
+          <h3>10 · Primary references</h3>
+          <p>Key publications and project repositories.</p>
+        </div>
+        <div class="refs">
+          <div class="ref">
+            <b>TimesFM (Google Research)</b>
+            <span>ICML 2025 Few-Shot In-Context Fine-Tuning</span>
+            <a href="https://github.com/google-research/timesfm" target="_blank" style="color:var(--red);font:500 9px var(--sans);display:block;margin-top:4px;">Open source ↗</a>
+          </div>
+          <div class="ref">
+            <b>Chronos (Amazon Science)</b>
+            <span>Language Model Analogy & Chronos-2</span>
+            <a href="https://github.com/amazon-science/chronos-forecasting" target="_blank" style="color:var(--red);font:500 9px var(--sans);display:block;margin-top:4px;">Open source ↗</a>
+          </div>
+          <div class="ref">
+            <b>Moirai 2.0 (Salesforce)</b>
+            <span>Decoder-only universal forecasting</span>
+            <a href="https://www.salesforce.com/blog/moirai-2-0/" target="_blank" style="color:var(--red);font:500 9px var(--sans);display:block;margin-top:4px;">Read announcement ↗</a>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Chapter Footer -->
+    <footer class="footer">
+      <div class="logo">Kairos<small>RESEARCH LAB</small></div>
+      <div class="footer-tag">From understanding the world to shaping it.</div>
+      <div class="footer-nav">
+        <a href="#" onclick="showHome()">Home</a>
+        <a href="#research" onclick="showHome()">Research Focus</a>
+        <a href="#" onclick="switchChapterMode('google')">Few-Shot Paper</a>
+        <a href="#" onclick="switchChapterMode('lab')">Math Lab</a>
+      </div>
+    </footer>
+
+  </div>
+</section>
+
+</div>
+
+<script>
+// Views Switching
+function showHome(){
+  document.getElementById('homeView').classList.add('active');
+  document.getElementById('timeSeriesView').classList.remove('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function openTimeSeries(){
+  document.getElementById('homeView').classList.remove('active');
+  document.getElementById('timeSeriesView').classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  // Initialize visualizers
+  initFewShotSim();
+  drawAttention(4);
+  selectDataset('seasonal');
+  drawForecast(32);
+  drawTensor('input');
+  drawCase('energy');
+}
+
+function switchChapterMode(mode){
+  const btnG = document.getElementById('btnModeGoogle');
+  const btnL = document.getElementById('btnModeLab');
+  const divG = document.getElementById('chapterGoogleMode');
+  const divL = document.getElementById('chapterLabMode');
+
+  if(mode === 'google'){
+    btnG.classList.add('active');
+    btnL.classList.remove('active');
+    divG.style.display = 'block';
+    divL.style.display = 'none';
+    initFewShotSim();
+  } else {
+    btnL.classList.add('active');
+    btnG.classList.remove('active');
+    divG.style.display = 'none';
+    divL.style.display = 'block';
+  }
+}
+
+function jump(id){
+  const el = document.getElementById(id);
+  if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// Google Research Few-Shot Simulation
+let fsShots = 3;
+let fsSeparators = true;
+
+function initFewShotSim(){
+  const canvas = document.getElementById('fewShotCanvas');
+  if(!canvas) return;
+  drawFewShotCanvas();
+  renderFewShotTokens();
+}
+
+function setShots(shots, btn){
+  document.querySelectorAll('.shot-btn').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  fsShots = shots;
+  renderFewShotTokens();
+  updateFewShotMetrics();
+  drawFewShotCanvas();
+}
+
+function toggleSep(enabled){
+  fsSeparators = enabled;
+  renderFewShotTokens();
+  updateFewShotMetrics();
+  drawFewShotCanvas();
+}
+
+function renderFewShotTokens(){
+  const strip = document.getElementById('kairosTokenStrip');
+  if(!strip) return;
+  let html = '';
+  for(let i=1; i<=fsShots; i++){
+    html += `<span class="tok-badge tok-ex">Ex ${i}: [History + Forecast]</span>`;
+    if(fsSeparators){
+      html += `<span class="tok-badge tok-sep">[SEP]</span>`;
+    }
+  }
+  html += `<span class="tok-badge tok-target">Target: Current Series → [Forecast]</span>`;
+  strip.innerHTML = html;
+}
+
+function updateFewShotMetrics(){
+  const errEl = document.getElementById('kairosMetricError');
+  const noteEl = document.getElementById('kairosMetricNote');
+  if(!errEl) return;
+
+  if(!fsSeparators && fsShots > 0){
+    errEl.textContent = '1.085 (+8.5% error)';
+    errEl.style.color = '#c6292e';
+    if(noteEl) noteEl.textContent = 'Naïve concatenation causes trend confusion without separator tokens.';
+    return;
+  }
+  if(fsShots === 0){
+    errEl.textContent = '1.000 (Base Zero-Shot)';
+    errEl.style.color = '#68717a';
+    if(noteEl) noteEl.textContent = 'TimesFM (Base) pre-trained model with no in-context examples.';
+  } else if(fsShots === 1){
+    errEl.textContent = '0.965 (3.5% improvement)';
+    errEl.style.color = '#1b5e20';
+    if(noteEl) noteEl.textContent = '1 in-context example provides immediate directional alignment.';
+  } else if(fsShots === 3){
+    errEl.textContent = '0.934 (6.6% improvement)';
+    errEl.style.color = '#c6292e';
+    if(noteEl) noteEl.textContent = 'Matches supervised fine-tuning (TimesFM-FT: 0.932) with 0 gradient steps!';
+  } else {
+    errEl.textContent = '0.931 (6.9% improvement)';
+    errEl.style.color = '#c6292e';
+    if(noteEl) noteEl.textContent = 'Exceeds supervised fine-tuning as in-context example count scales.';
+  }
+}
+
+function drawFewShotCanvas(){
+  const canvas = document.getElementById('fewShotCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * (window.devicePixelRatio || 1);
+  canvas.height = rect.height * (window.devicePixelRatio || 1);
+  ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+
+  const w = rect.width;
+  const h = rect.height;
+  ctx.clearRect(0, 0, w, h);
+
+  // Subtle grid
+  ctx.strokeStyle = '#f0ece8';
+  ctx.lineWidth = 1;
+  for(let x=40; x<w; x+=40){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+  for(let y=30; y<h; y+=30){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+
+  const pad = { left: 30, right: 30, top: 35, bottom: 35 };
+  const availW = w - pad.left - pad.right;
+  const midY = h * 0.52;
+  const totalSegs = fsShots + 1;
+  const segW = availW / totalSegs;
+
+  // Draw in-context examples
+  for(let s=0; s<fsShots; s++){
+    const segX = pad.left + s * segW;
+    const innerW = segW - (fsSeparators ? 20 : 0);
+
+    ctx.fillStyle = '#faf7f4';
+    ctx.fillRect(segX, pad.top, innerW, h - pad.top - pad.bottom);
+    ctx.strokeStyle = '#e7e3df';
+    ctx.strokeRect(segX, pad.top, innerW, h - pad.top - pad.bottom);
+
+    ctx.fillStyle = '#c6292e';
+    ctx.font = '600 10px Inter';
+    ctx.fillText(`Example ${s+1}`, segX + 8, pad.top + 16);
+
+    ctx.beginPath();
+    ctx.strokeStyle = '#15202b';
+    ctx.lineWidth = 1.8;
+    const dir = s%2 === 0 ? 1 : -0.7;
+    for(let x=0; x<innerW-14; x++){
+      const t = x/innerW;
+      const yVal = Math.sin(t*8)*15 + t*30*dir;
+      const curY = midY - yVal;
+      if(x===0) ctx.moveTo(segX+8+x, curY); else ctx.lineTo(segX+8+x, curY);
+    }
+    ctx.stroke();
+
+    if(fsSeparators){
+      const sepX = segX + innerW + 3;
+      ctx.fillStyle = '#fbefed';
+      ctx.strokeStyle = '#c6292e';
+      ctx.lineWidth = 1;
+      ctx.fillRect(sepX, pad.top, 14, h - pad.top - pad.bottom);
+      ctx.strokeRect(sepX, pad.top, 14, h - pad.top - pad.bottom);
+
+      ctx.save();
+      ctx.translate(sepX + 10, pad.top + (h - pad.top - pad.bottom)/2 + 12);
+      ctx.rotate(-Math.PI/2);
+      ctx.fillStyle = '#c6292e';
+      ctx.font = '600 8.5px "Roboto Mono"';
+      ctx.fillText('[SEP]', 0, 0);
+      ctx.restore();
+    }
+  }
+
+  // Draw Target
+  const targetX = pad.left + fsShots * segW;
+  const targetW = segW - 6;
+
+  ctx.fillStyle = '#fffaf8';
+  ctx.fillRect(targetX, pad.top, targetW, h - pad.top - pad.bottom);
+  ctx.strokeStyle = '#d9a2a2';
+  ctx.strokeRect(targetX, pad.top, targetW, h - pad.top - pad.bottom);
+
+  ctx.fillStyle = '#c6292e';
+  ctx.font = '600 10px Inter';
+  ctx.fillText('Target Task Series', targetX + 8, pad.top + 16);
+
+  const splitX = targetX + targetW * 0.55;
+  ctx.strokeStyle = '#e7e3df';
+  ctx.setLineDash([3,3]);
+  ctx.beginPath(); ctx.moveTo(splitX, pad.top); ctx.lineTo(splitX, h - pad.bottom); ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.fillStyle = '#68717a'; ctx.font = '9px Inter';
+  ctx.fillText('History', targetX + 8, h - pad.bottom - 6);
+  ctx.fillStyle = '#c6292e';
+  ctx.fillText('Forecast →', splitX + 6, h - pad.bottom - 6);
+
+  // Target History
+  ctx.beginPath();
+  ctx.strokeStyle = '#15202b';
+  ctx.lineWidth = 2;
+  let lastY = midY;
+  const histW = splitX - targetX - 12;
+  for(let x=0; x<=histW; x++){
+    const t = x/histW;
+    const yVal = Math.sin(t*5)*12 + t*14;
+    const curY = midY - yVal;
+    if(x===0) ctx.moveTo(targetX+8+x, curY); else ctx.lineTo(targetX+8+x, curY);
+    lastY = curY;
+  }
+  ctx.stroke();
+
+  // Target Forecast
+  const isConfused = !fsSeparators && fsShots > 0;
+  ctx.beginPath();
+  ctx.strokeStyle = isConfused ? '#c6292e' : '#15202b';
+  ctx.lineWidth = 2.4;
+  ctx.moveTo(splitX, lastY);
+
+  const fSteps = targetX + targetW - splitX - 10;
+  for(let x=0; x<=fSteps; x++){
+    const t = x/fSteps;
+    let yVal = 0;
+    if(isConfused){
+      yVal = Math.sin(t * 16) * 20 + (Math.random() - 0.5) * 6;
+    } else {
+      const boost = fsShots > 0 ? 1.25 : 1.0;
+      yVal = Math.sin(t * 4) * 14 * boost + t * 24;
+    }
+    ctx.lineTo(splitX + x, lastY - yVal);
+  }
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(splitX, lastY, 4, 0, Math.PI*2);
+  ctx.fillStyle = isConfused ? '#c6292e' : '#15202b';
+  ctx.fill();
+}
+
+// Classical Lab Functions
+function mathMove(v){document.getElementById('mathStep').textContent=v+'%'}
+function patchMove(v){document.getElementById('patchVal').textContent=v;drawAttention(Math.min(8,Math.floor(v/4)))}
+function attentionMove(v){document.getElementById('focusVal').textContent=v;drawAttention(+v)}
+function drawAttention(focus){let s=document.getElementById('attention');if(!s)return;s.innerHTML='';let n=9,sz=20,g=5,x0=35,y0=20;for(let r=0;r<n;r++)for(let c=0;c<n;c++){let d=Math.abs(c-focus)+Math.abs(r-focus)*.18;let val=Math.max(.035,1-d/10);let rect=document.createElementNS('http://www.w3.org/2000/svg','rect');rect.setAttribute('x',x0+c*(sz+g));rect.setAttribute('y',y0+r*(sz+g));rect.setAttribute('width',sz);rect.setAttribute('height',sz);rect.setAttribute('rx','2');rect.setAttribute('fill','#c6292e');rect.setAttribute('opacity',(0.06+val*.75).toFixed(2));s.appendChild(rect)}let t=document.createElementNS('http://www.w3.org/2000/svg','text');t.setAttribute('x','35');t.setAttribute('y','213');t.setAttribute('font-family','Inter');t.setAttribute('font-size','9');t.setAttribute('fill','#7b746f');t.textContent='focus token '+focus;s.appendChild(t)}
+function selectEra(el,title,name){document.querySelectorAll('.era').forEach(x=>x.classList.remove('active'));el.classList.add('active');let formulas={'AR / MA':'xₜ = c + φ₁xₜ₋₁ + ··· + φₚxₜ₋ₚ + εₜ','ARIMA':'φ(B)(1 − B)ᵈxₜ = θ(B)εₜ','State Space':'xₜ = Axₜ₋₁ + Buₜ + wₜ  ·  yₜ = Cxₜ + vₜ','RNN / LSTM':'hₜ = fθ(xₜ,hₜ₋₁)','Transformers':'Attention(Q,K,V) = softmax(QKᵀ/√dₖ)V','TSFMs':'pθ(xₜ₊₁:ₜ₊H | x₁:ₜ,c)'};document.getElementById('eraExplain').innerHTML='<div class="detail-grid"><div><h4>'+title+' · '+name+'</h4><div class="formula">'+formulas[name]+'</div></div><div><p class="explain">The representation changes: '+title.toLowerCase()+'. Classical models specify dependencies explicitly; foundation models learn reusable priors across diverse domains.</p></div></div>'}
+const modelCopy={TimesFM:{title:'TimesFM 3.0 — native multivariate forecasting',left:['Officially listed as the latest TimesFM version.','Supports univariate and multivariate forecasting with in-context fine-tuning.','Supports past-only and past-and-future covariates.','Zero-shot generalist forecasting with quantile uncertainty outputs.'],right:['Choose target tensor.','Provide context and optional covariates.','Set forecast horizon.','Inspect median + quantiles.','Compare with baseline.'],note:'License: check repository documentation for current non-commercial weight licensing restrictions.'},Chronos:{title:'Chronos-2 — tokenization plus broader task support',left:['Turns numerical observations into tokens for language model forecasting.','Supports zero-shot univariate, multivariate and covariate-informed forecasting.','Includes Chronos-Bolt for high-speed patch-based inference.'],right:['Pick local dataset.','Inspect scaling & tokenization.','Run zero-shot inference.','Compare sampled trajectories.'],note:'Tokenization choices directly change computational and statistical trade-offs.'},Moirai:{title:'Moirai 2.0 — decoder-only universal forecasting',left:['Salesforce moved Moirai 2.0 from masked encoder to decoder-only Transformer.','Pretraining data expanded with GIFT-Eval and KernelSynth series.','Reports improvements in MASE, CRPS, and parameter efficiency.'],right:['Select heterogeneous series.','Inspect context representation.','Generate probabilistic forecasts.','Compare accuracy and speed.'],note:'Can one pretrained temporal model transfer reliably across frequencies and domains?'}};
+function modelInfo(name,el){document.querySelectorAll('.model-card').forEach(x=>x.classList.remove('active'));if(el)el.classList.add('active');let c=modelCopy[name];document.getElementById('modelDetail').innerHTML='<div class="detail-grid"><div><h4>'+c.title+'</h4><ul>'+c.left.map(x=>'<li>'+x+'</li>').join('')+'</ul><p class="micro">'+c.note+'</p></div><div><h4>Interactive experiment</h4><ol>'+c.right.map(x=>'<li>'+x+'</li>').join('')+'</ol></div></div>';document.getElementById('modelDetail').classList.add('show')}
+const cases={energy:{label:'CASE 01 · ENERGY',title:'Grid load forecasting',text:'Forecast the next demand window from historical load plus temperature covariates.',math:'ŷₜ₊ₕ = fθ(y₁:ₜ, temperature₁:ₜ₊ₕ)',impact:'SIGNAL → PLANNING',bar:78},retail:{label:'CASE 02 · RETAIL',title:'Inventory demand',text:'Forecast item demand while preserving seasonality and event shocks.',math:'ŷₜ₊ₕ = fθ(demand₁:ₜ, price₁:ₜ₊ₕ, promo₁:ₜ₊ₕ)',impact:'DEMAND → STOCK',bar:64},mobility:{label:'CASE 03 · MOBILITY',title:'Traffic flow',text:'Forecast traffic network flow using recent trajectories and related channels.',math:'Ŷₜ₊ₕ = fθ(Y₁:ₜ, weather, calendar)',impact:'FLOW → ACTION',bar:70}};
+function selectCase(name,el){document.querySelectorAll('.case-tab').forEach(x=>x.classList.remove('active'));if(el)el.classList.add('active');drawCase(name)}
+function drawCase(name){let c=cases[name];if(!c)return;document.getElementById('caseLabel').textContent=c.label;document.getElementById('caseTitle').textContent=c.title;document.getElementById('caseText').textContent=c.text;document.getElementById('caseMath').textContent=c.math;document.getElementById('caseImpact').textContent=c.impact;document.getElementById('caseImpactBar').style.width=c.bar+'%';let s=document.getElementById('caseChart');s.innerHTML='';let path=a=>a.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');let a=[],b=[];for(let i=0;i<100;i++){let y=125-48*Math.sin(i*.18)-15*Math.sin(i*.052);if(name==='retail')y=125-34*Math.sin(i*.24)-18*Math.sin(i*.06)+(i%19===0?-22:0);if(name==='mobility')y=125-28*Math.sin(i*.31)-30*Math.sin(i*.073);a.push([i*6.1,y]);b.push([i*6.1,125-35*Math.sin(i*.18)]);}s.innerHTML='<path d="'+path(b)+'" fill="none" stroke="#b9b0ab" stroke-width="1.5" stroke-dasharray="5 4"/><path d="'+path(a)+'" fill="none" stroke="#c6292e" stroke-width="2"/><path d="M430 20V225" stroke="#c6292e" stroke-width="1" stroke-dasharray="4 5"/><text x="438" y="35" font-family="Inter" font-size="9" fill="#7b746f">forecast boundary</text>'}
+const datasets={seasonal:{title:'Seasonal demand',desc:'Synthetic retail-like demand with seasonality and mild noise.',fn:i=>120+25*Math.sin(i*.19)+10*Math.sin(i*.047)},trend:{title:'Trend + shocks',desc:'A drifting signal with occasional local shocks.',fn:i=>80+i*.55+18*Math.sin(i*.13)+(i%27===0?-24:0)},multi:{title:'Multivariate system',desc:'Three correlated channels represented by one local target view.',fn:i=>105+18*Math.sin(i*.16)+12*Math.sin(i*.07)+8*Math.cos(i*.031)}};
+let currentDataset='seasonal',showBand=true;
+function selectDataset(name,el){currentDataset=name;if(el){document.querySelectorAll('.dataset-tabs .chip').forEach(x=>x.classList.remove('active'));el.classList.add('active')}let d=datasets[name];document.getElementById('datasetTitle').textContent=d.title;document.getElementById('datasetDesc').textContent=d.desc;drawForecast(+document.getElementById('horizonVal').textContent)}
+function drawForecast(h){let s=document.getElementById('forecastChart');if(!s)return;let d=datasets[currentDataset];s.innerHTML='';let obs=[],base=[],upper=[],lower=[];for(let i=0;i<112;i++){let y=d.fn(i)+3*Math.sin(i*.61);obs.push([i*5.6,Math.max(20,210-y*.72)]);let b=d.fn(Math.max(0,i-2));base.push([i*5.6,Math.max(20,210-b*.72)]);let spread=9+(i>72?(i-72)*.25:0);upper.push([i*5.6,Math.max(20,210-(d.fn(i)+spread)*.72)]);lower.push([i*5.6,Math.min(225,210-(d.fn(i)-spread)*.72)])}let boundary=112-h;let path=a=>a.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');let obsCtx=obs.slice(0,boundary),forecast=obs.slice(boundary);let band=upper.slice(boundary).concat(lower.slice(boundary).reverse());s.innerHTML='<path d="'+path(band)+' Z" fill="#d9d0cb" opacity="'+(showBand?.42:0)+'" stroke="none"/><path d="'+path(base)+'" fill="none" stroke="#96918d" stroke-width="1.5" stroke-dasharray="5 4"/><path d="'+path(obsCtx)+'" fill="none" stroke="#c6292e" stroke-width="2"/><path d="'+path(forecast)+'" fill="none" stroke="#8b3d40" stroke-width="2"/><path d="M'+(boundary*5.6).toFixed(1)+' 15V225" stroke="#c6292e" stroke-width="1" stroke-dasharray="4 5"/>';document.getElementById('metricMae').textContent=(4.8+(h/32)*1.6).toFixed(1);document.getElementById('metricRmse').textContent=(6.7+(h/32)*2.0).toFixed(1);document.getElementById('metricWql').textContent=(0.14+(h/32)*.04).toFixed(2)}
+function forecastMove(v){document.getElementById('horizonVal').textContent=v;drawForecast(+v)}
+function toggleUncertainty(btn){showBand=!showBand;btn.textContent=showBand?'Hide uncertainty':'Show uncertainty';btn.classList.toggle('active',showBand);drawForecast(+document.getElementById('horizonVal').textContent)}
+function tensor(kind){let map={input:['INPUT TENSOR','shape: [1, 128, 1]\ndtype: float32\nmean: 0.000\nstd: 1.000\nmeaning: observed context'],patches:['PATCH TOKENS','shape: [1, 16, 8]\npatch size: 8\ntokens: 16\nmeaning: local temporal chunks'],embed:['EMBEDDING','shape: [1, 16, 512]\nd_model: 512\nmeaning: learned temporal representation'],attention:['ATTENTION','shape: [1, 8, 16, 16]\nheads: 8\nscore: QKᵀ/√dₖ\nmeaning: dependency map'],latent:['LATENT STATE','shape: [1, 16, 512]\nresidual: on\nFFN: on\nmeaning: contextualized representation'],forecast:['FORECAST','shape: [1, 32]\nhorizon: 32\noutput: point + quantiles\nmeaning: future trajectory'],uncertainty:['UNCERTAINTY','shape: [1, 32, 9]\nquantiles: 0.1 … 0.9\nmeaning: predictive distribution']}[kind]||map.input;document.getElementById('tensorTitle').textContent=map[0];document.getElementById('tensorText').textContent=map[1];let s=document.getElementById('tensorSvg');s.innerHTML='';let n=kind==='attention'?12:kind==='patches'?16:10;for(let i=0;i<n;i++){let r=document.createElementNS('http://www.w3.org/2000/svg','rect');r.setAttribute('x',25+i*43);r.setAttribute('y',50+(i%4)*28);r.setAttribute('width',32);r.setAttribute('height',20);r.setAttribute('rx',3);r.setAttribute('fill',i%3===0?'#c6292e':'#d9d0cb');r.setAttribute('opacity',(.35+(i%5)*.12).toFixed(2));s.appendChild(r)}let t=document.createElementNS('http://www.w3.org/2000/svg','text');t.setAttribute('x','25');t.setAttribute('y','185');t.setAttribute('font-family','Inter');t.setAttribute('font-size','11');t.setAttribute('fill','#6d6762');t.textContent=map[0];s.appendChild(t)}
+function animateDynamics(kind){let s=document.getElementById('dynamicsSvg'),status=document.getElementById('dynamicsStatus');s.innerHTML='';let cfg={kuramoto:{name:'KURAMOTO · 5 COMMUNITIES',fn:i=>110-58*Math.sin(i*.21)-18*Math.sin(i*.053)},stuart:{name:'STUART–LANDAU · 7 CLUSTERS',fn:i=>110-42*Math.sin(i*.28)-15*Math.cos(i*.071)},ks:{name:'KURAMOTO–SIVASHINSKY · CHAOTIC FIELD',fn:i=>110-35*Math.sin(i*.17)-23*Math.sin(i*.43)}}[kind];status.textContent=cfg.name+' — animated local trajectory';let p=[];for(let i=0;i<180;i++){p.push([i*5, cfg.fn(i)+6*Math.sin(i*.73)])}let path=p.map((q,i)=>(i?'L':'M')+q[0]+','+q[1]).join(' ');s.innerHTML='<path d="'+path+'" fill="none" stroke="#c6292e" stroke-width="2"/><path d="M0 110H900" stroke="#e3ded9" stroke-width="1"/>';let dot=document.createElementNS('http://www.w3.org/2000/svg','circle');dot.setAttribute('r','5');dot.setAttribute('fill','#c6292e');s.appendChild(dot);let i=0;clearInterval(window.dynTimer);window.dynTimer=setInterval(()=>{if(i>=p.length){clearInterval(window.dynTimer);return}dot.setAttribute('cx',p[i][0]);dot.setAttribute('cy',p[i][1]);i++},18)}
+
+window.addEventListener('load',()=>{
+  drawAttention(4);drawForecast(32);drawTensor('input');drawCase('energy');
+  if(window.location.hash==='#research'){
+    const r=document.getElementById('research');if(r)r.scrollIntoView({behavior:'smooth'});
+  }
+});
+</script></body></html>
