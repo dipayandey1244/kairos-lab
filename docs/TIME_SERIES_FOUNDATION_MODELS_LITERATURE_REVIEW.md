@@ -290,3 +290,99 @@ The Kairos / WAM research laboratory leverages three controlled physical dynamic
 10. **Woo, G., Liu, C., Sahoo, D., Kumar, A., & Hoi, S.** (2024). *Unified Training of Universal Time Series Forecasting Transformers (Moirai)*. International Conference on Machine Learning (ICML 2024).
 11. **Takens, F.** (1981). *Detecting strange attractors in turbulence*. Dynamical Systems and Turbulence, Warwick 1980, 366–381. Springer.
 12. **Kaplan, J. L., & Yorke, J. A.** (1979). *Chaotic behavior of multidimensional difference equations*. Functional Differential Equations and Approximation of Fixed Points, 204–227. Springer.
+
+---
+
+## 10. The Demystified Mathematical Equations: Anatomy, Intuition & Analogies
+
+To make these advanced equations intuitive, this section breaks down each foundational formula into its component terms, explains the real-world operational role of every symbol, and provides an everyday mental model.
+
+---
+
+### Equation 1: The Optimal Conditional Predictor (Tier 0)
+$$\\underbrace{\\hat{X}_{t+h}}_{\\text{Best Forecast}} = \\mathbb{E}[ \\underbrace{X_{t+h}}_{\\text{True Future}} \\mid \\underbrace{\\mathcal{F}_t}_{\\text{Past History}} ]$$
+
+- **In Plain English:** The single most accurate forecast you can mathematically make is the probability-weighted center of gravity of all possible futures, calculated using all information collected up to the present moment.
+- **The Analogy:** Predicting where a tennis ball will land. You cannot predict with 100% certainty because of air gusts, but given its flight trajectory so far ($\\mathcal{F}_t$), there is an average expected landing point.
+- **Symbol Anatomy:**
+  - $\\hat{X}_{t+h}$: The forecast for $h$ steps ahead.
+  - $\\mathbb{E}[\\cdot]$: Mathematical expectation (mean of the probability distribution).
+  - $X_{t+h}$: The unknown future value.
+  - $\\mathcal{F}_t$: The *filtration*—the information set containing the entire observed history up to time $t$.
+
+---
+
+### Equation 2: Wold's Decomposition Theorem (Tier 1)
+$$\\underbrace{X_t}_{\\text{Observed Today}} = \\sum_{j=0}^{\\infty} \\underbrace{\\psi_j}_{\\text{Memory Decay}} \\underbrace{\\epsilon_{t-j}}_{\\text{Past Shock}} + \\underbrace{V_t}_{\\text{Deterministic Rhythm}}$$
+
+- **In Plain English:** Any stationary time series is mathematically composed of just two things: predictable background rhythms (like tides or sunrise, $V_t$) plus the fading echoes of past random surprises ($\\sum \\psi_j \\epsilon_{t-j}$).
+- **The Analogy:** An echo in a canyon. A rock falls into a lake ($j$ steps ago); the splash is gone, but the rippling waves ($\\psi_j$) still rock your boat today.
+- **Symbol Anatomy:**
+  - $X_t$: Current observation.
+  - $\\epsilon_{t-j}$: White noise innovation—the unpredictable shock that occurred $j$ timesteps ago.
+  - $\\psi_j$: Impulse response coefficient—how much the surprise from $j$ steps ago matters right now.
+  - $V_t$: Purely deterministic component (can be predicted with zero variance from infinite past).
+
+---
+
+### Equation 3: The Kalman Gain Slider (Tier 2)
+$$\\underbrace{K_t}_{\\text{Trust Slider [0, 1]}} = \\frac{\\underbrace{P_{t|t-1} H_t^T}_{\\text{Model Uncertainty}}}{\\underbrace{H_t P_{t|t-1} H_t^T + R_t}_{\\text{Model Uncertainty + Sensor Noise}}}$$
+
+- **In Plain English:** The Kalman Gain is an automatic confidence dial between 0 and 1. When your physical sensor is noisy ($R_t \\gg P$), $K_t \\to 0$, so the filter trusts the physics model. When the sensor is crystal-clear ($R_t \\to 0$), $K_t \\to 1$, so the filter trusts the fresh measurement.
+- **The Analogy:** Driving in fog with a GPS. When satellite reception is bad (high noise), you trust your odometer; on a sunny highway, you trust the GPS.
+- **Symbol Anatomy:**
+  - $K_t$: Optimal gain matrix scaling the innovation residual.
+  - $P_{t|t-1}$: Prior error covariance—how uncertain the model is about its prediction.
+  - $R_t$: Measurement error covariance—how noisy the incoming sensor readings are.
+  - $H_t$: Observation projection matrix mapping state space to measurement space.
+
+---
+
+### Equation 4: The Vanishing Gradient Dilemma in RNNs (Tier 3)
+$$\\underbrace{\\frac{\\partial \\mathcal{L}}{\\partial h_t}}_{\\text{Learning Signal at Step } t} = \\frac{\\partial \\mathcal{L}}{\\partial h_T} \\prod_{k=t+1}^T \\underbrace{W_{hh}^T}_{\\text{Weight Matrix}} \\underbrace{\\operatorname{diag}(1 - \\tanh^2(a_k))}_{\\text{Always } < 1}$$
+
+- **In Plain English:** When training standard recurrent neural networks over 100 steps, you multiply numbers strictly less than 1 over and over again. By the time the learning signal travels backward 50 steps, it has shrunk to zero, so the network completely forgets early history.
+- **The Analogy:** The children's game of "Telephone" (whispering down the lane). After a message passes through 30 people, the original words fade into total silence.
+- **Symbol Anatomy:**
+  - $\\frac{\\partial \\mathcal{L}}{\\partial h_t}$: Loss gradient with respect to the hidden state at early timestep $t$.
+  - $W_{hh}$: Recurrent hidden-to-hidden transition weight matrix.
+  - $1 - \\tanh^2(a_k)$: Derivative of the hyperbolic tangent activation function, strictly bounded in $[0, 1]$.
+
+---
+
+### Equation 5: PatchTST Continuous Patching Speedup (Tier 4)
+$$\\text{Effective Tokens } N = \\frac{L}{P} \implies \\underbrace{\\mathcal{O}(N^2)}_{\\text{Patch Attention}} = \\frac{1}{P^2} \\cdot \\underbrace{\\mathcal{O}(L^2)}_{\\text{Point-wise Cost}} \quad \\xrightarrow{P=32} \quad \\mathbf{1024\\times \\text{ Faster}}$$
+
+- **In Plain English:** Instead of treating every individual number as a token, we group contiguous chunks of $P=32$ points into a single patch token. This reduces the number of tokens by 32, which shrinks quadratic attention memory and compute by $32^2 = 1024\\times$, while preserving local slopes and shapes that single points lose!
+- **The Analogy:** Reading a book paragraph-by-paragraph instead of letter-by-letter. You read 1000× faster and understand the meaning much better!
+- **Symbol Anatomy:**
+  - $L$: Total lookback sequence length (e.g., 1024 timestamps).
+  - $P$: Patch length (e.g., 32 points grouped per patch).
+  - $N$: Resulting sequence length of patch embeddings ($N = L/P = 32$).
+  - $\\frac{1}{P^2}$: Quadratic acceleration factor achieved over point-wise attention.
+
+---
+
+### Equation 6: TimesFM-ICF Prompting with Separators (Tier 5)
+$$\\underbrace{\\mathcal{S}}_{\\text{Prompt Sequence}} = [ \\underbrace{e_1}_{\\text{Store 1}} \\circ \\underbrace{\\mathbf{v}_{\\text{[SEP]}}}_{\\text{Stop Sign}} \\circ \\underbrace{e_2}_{\\text{Store 2}} \\circ \\dots \\circ \\underbrace{\\mathbf{v}_{\\text{[SEP]}}}_{\\text{Stop Sign}} \\circ \\underbrace{x^{\\text{hist}}}_{\\text{Target Series}} ]$$
+
+- **In Plain English:** We feed the foundation model examples of how other stores behaved, but we separate them with a learnable digital "stop sign" ($\\mathbf{v}_{\\text{[SEP]}}$). This allows the self-attention mechanism to borrow general seasonal rhythms without confusing raw sales volumes between different stores.
+- **The Analogy:** Punctuation in language. Without commas, periods, and paragraphs, words from different sentences blend into chaotic nonsense. Separator tokens are the punctuation of time series!
+- **Symbol Anatomy:**
+  - $\\mathcal{S}$: The concatenated token prompt fed into the transformer decoder.
+  - $e_k$: In-context historical examples containing both lookback and future horizon.
+  - $\\mathbf{v}_{\\text{[SEP]}}$: Learnable separator token vector in $\\mathbb{R}^{d_{\\text{model}}}$ that absorbs cross-example level shifts.
+  - $x^{\\text{hist}}$: The target series lookback for which we desire a forecast.
+
+---
+
+### Equation 7: Takens' Delay Reconstruction & Attractor Dimension (Tier 6)
+$$\\underbrace{v_t}_{\\text{Full State in } \\mathbb{R}^m} = [ x_t, \; x_{t-\\tau}, \; x_{t-2\\tau}, \; \\dots, \; x_{t-(m-1)\\tau} ]^T, \quad \\text{provided } m > 2d$$
+
+- **In Plain English:** Even if a physical system has 50 hidden variables and you can only measure ONE scalar sensor over time ($x_t$), you can mathematically reconstruct the entire multi-dimensional geometric attractor by creating delayed copies of that single sensor!
+- **The Analogy:** Reconstructing the 3D shape and movement of an invisible dancing person purely by watching the single shadow cast by their hand on a wall over time.
+- **Symbol Anatomy:**
+  - $x_t$: The scalar observation measured at time $t$.
+  - $\\tau$: Temporal delay lag step.
+  - $m$: Delay embedding dimension ($m > 2d_{\\text{attractor}}$).
+  - $v_t$: Reconstructed phase-space state vector in $\\mathbb{R}^m$, preserving topological invariants of the true system.
