@@ -1,0 +1,2706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Time-Series Foundation Models as Approximate Information State World Models — Kairos Research Lab</title>
+
+  <!-- Google Fonts: Cormorant Garamond for display headlines, Inter for body, Roboto Mono for math/code -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       CINEMATIC SCIENTIFIC AESTHETIC & DESIGN TOKENS
+       ========================================================================== */
+    :root {
+      --bg-space: #07090E;
+      --bg-surface: #0E131F;
+      --bg-surface-elevated: #151D2F;
+      --bg-card: rgba(21, 29, 47, 0.75);
+      --bg-card-border: rgba(255, 255, 255, 0.08);
+
+      --text-main: #F1F5F9;
+      --text-muted: #94A3B8;
+      --text-subtle: #64748B;
+
+      /* Vibrant Scientific Accents */
+      --cyan: #00F2FE;
+      --cyan-glow: rgba(0, 242, 254, 0.25);
+      --amber: #FF9F1C;
+      --amber-glow: rgba(255, 159, 28, 0.25);
+      --crimson: #FF3366;
+      --crimson-glow: rgba(255, 51, 102, 0.25);
+      --emerald: #10B981;
+      --purple: #A855F7;
+
+      /* Typography */
+      --serif: "Cormorant Garamond", Georgia, serif;
+      --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --mono: "Roboto Mono", monospace;
+
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; background-color: var(--bg-space); }
+    body {
+      background-color: var(--bg-space);
+      color: var(--text-main);
+      font-family: var(--sans);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; cursor: pointer; border: none; background: none; }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-space); }
+    ::-webkit-scrollbar-thumb { background: #222F49; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #334469; }
+
+    /* Layout Containers */
+    .article-container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 28px;
+    }
+
+    /* ==========================================================================
+       TOP NAVIGATION BAR
+       ========================================================================== */
+    header.cinema-header {
+      height: 72px;
+      background: rgba(7, 9, 14, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--bg-card-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+    }
+
+    .brand-cluster {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .brand-logo {
+      font-family: var(--serif);
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: #FFFFFF;
+      display: flex;
+      flex-direction: column;
+      line-height: 1;
+    }
+
+    .brand-logo span {
+      font-family: var(--mono);
+      font-size: 8.5px;
+      letter-spacing: 3px;
+      color: var(--cyan);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .header-tagline {
+      font-size: 12px;
+      color: var(--text-muted);
+      border-left: 1px solid rgba(255, 255, 255, 0.12);
+      padding-left: 16px;
+      display: none;
+    }
+    @media (min-width: 900px) { .header-tagline { display: block; } }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .nav-pill {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .nav-pill:hover, .nav-pill.active {
+      color: #FFFFFF;
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .nav-pill.highlight {
+      color: var(--cyan);
+      background: rgba(0, 242, 254, 0.08);
+      border-color: rgba(0, 242, 254, 0.25);
+    }
+
+    /* ==========================================================================
+       HERO OPENING: THE GRAND SCIENTIFIC QUESTION
+       ========================================================================== */
+    .hero-stage {
+      position: relative;
+      padding: 96px 0 72px;
+      overflow: hidden;
+      border-bottom: 1px solid var(--bg-card-border);
+    }
+
+    .hero-glow-orb {
+      position: absolute;
+      top: -120px;
+      right: 10%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(0, 242, 254, 0.12) 0%, rgba(168, 85, 247, 0.05) 50%, transparent 70%);
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 980px;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 24px;
+      background: rgba(0, 242, 254, 0.08);
+      padding: 6px 16px;
+      border-radius: var(--radius-full);
+      border: 1px solid rgba(0, 242, 254, 0.2);
+    }
+
+    .hero-question {
+      font-family: var(--serif);
+      font-size: clamp(40px, 5.5vw, 68px);
+      font-weight: 500;
+      line-height: 1.08;
+      letter-spacing: -1.5px;
+      color: #FFFFFF;
+      margin-bottom: 28px;
+    }
+
+    .hero-question em {
+      font-style: italic;
+      color: var(--cyan);
+    }
+
+    .hero-thesis {
+      font-size: 20px;
+      line-height: 1.6;
+      color: #CBD5E1;
+      max-width: 840px;
+      margin-bottom: 40px;
+    }
+
+    .hero-thesis strong {
+      color: #FFFFFF;
+      font-weight: 600;
+    }
+
+    .hero-meta-strip {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 24px;
+      padding-top: 28px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .meta-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .meta-badge svg { width: 16px; height: 16px; stroke: var(--cyan); }
+
+    /* ==========================================================================
+       RESEARCH SECTIONS GENERAL ARCHITECTURE
+       ========================================================================== */
+    .research-section {
+      padding: 84px 0;
+      border-bottom: 1px solid var(--bg-card-border);
+      position: relative;
+    }
+
+    .section-head {
+      margin-bottom: 40px;
+      max-width: 880px;
+    }
+
+    .section-kicker {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--cyan);
+      display: block;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-family: var(--serif);
+      font-size: clamp(32px, 4vw, 48px);
+      font-weight: 600;
+      line-height: 1.15;
+      color: #FFFFFF;
+      margin-bottom: 16px;
+      letter-spacing: -0.5px;
+    }
+
+    .section-lead {
+      font-size: 18px;
+      line-height: 1.6;
+      color: #94A3B8;
+    }
+
+    /* "WATCH IT" ANIMATION CALLOUT BANNERS */
+    .watch-it-banner {
+      background: linear-gradient(135deg, rgba(0, 242, 254, 0.08) 0%, rgba(21, 29, 47, 0.9) 100%);
+      border: 1px solid rgba(0, 242, 254, 0.25);
+      border-left: 4px solid var(--cyan);
+      border-radius: var(--radius-md);
+      padding: 18px 24px;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .watch-it-icon {
+      font-size: 24px;
+      line-height: 1;
+      padding-top: 2px;
+    }
+
+    .watch-it-body h4 {
+      font-family: var(--sans);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--cyan);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pulse-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: var(--cyan);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--cyan);
+      animation: pulseGlow 2s infinite;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.3); }
+    }
+
+    .watch-it-body p {
+      font-size: 14.5px;
+      line-height: 1.55;
+      color: #CBD5E1;
+    }
+
+    /* ==========================================================================
+       CINEMA SIMULATION WORKBENCH CARDS
+       ========================================================================== */
+    .cinema-lab-card {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      margin-bottom: 32px;
+    }
+
+    .lab-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding-bottom: 20px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .toolbar-title-group h3 {
+      font-family: var(--sans);
+      font-size: 18px;
+      font-weight: 700;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toolbar-title-group p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .controls-strip {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .slider-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(14, 19, 31, 0.6);
+      padding: 8px 16px;
+      border-radius: var(--radius-full);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .slider-group label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .slider-group input[type="range"] {
+      -webkit-appearance: none;
+      width: 110px;
+      height: 4px;
+      background: #25334E;
+      border-radius: 2px;
+      outline: none;
+    }
+
+    .slider-group input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
+      cursor: pointer;
+      transition: transform 0.1s ease;
+    }
+
+    .slider-group input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.3);
+    }
+
+    .slider-val {
+      font-family: var(--mono);
+      font-size: 12.5px;
+      color: var(--cyan);
+      font-weight: 600;
+      min-width: 44px;
+      text-align: right;
+    }
+
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 242, 254, 0.12);
+      color: var(--cyan);
+      border: 1px solid rgba(0, 242, 254, 0.3);
+      padding: 8px 18px;
+      border-radius: var(--radius-full);
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .action-btn:hover {
+      background: var(--cyan);
+      color: #07090E;
+      box-shadow: 0 0 16px var(--cyan-glow);
+    }
+
+    .action-btn.secondary {
+      background: rgba(255, 255, 255, 0.06);
+      color: #FFFFFF;
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .action-btn.secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Simulation Viewport & Multi-Screen Layout */
+    .simulation-viewport-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    @media (min-width: 960px) {
+      .simulation-viewport-grid {
+        grid-template-columns: 2fr 1fr;
+      }
+    }
+
+    .canvas-frame {
+      position: relative;
+      background: #090D17;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      aspect-ratio: 16 / 9;
+      min-height: 380px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    canvas.sim-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .canvas-hud-overlay {
+      position: absolute;
+      top: 14px;
+      left: 16px;
+      right: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .hud-tag {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      background: rgba(7, 9, 14, 0.7);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #FFFFFF;
+    }
+
+    .hud-tag.cyan { border-color: rgba(0, 242, 254, 0.4); color: var(--cyan); }
+    .hud-tag.amber { border-color: rgba(255, 159, 28, 0.4); color: var(--amber); }
+    .hud-tag.emerald { border-color: rgba(16, 185, 129, 0.4); color: var(--emerald); }
+    .hud-tag.crimson { border-color: rgba(255, 51, 102, 0.4); color: var(--crimson); }
+
+    .canvas-readout {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-muted);
+      background: rgba(7, 9, 14, 0.7);
+      backdrop-filter: blur(8px);
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Telemetry Side Column */
+    .telemetry-column {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .telemetry-card {
+      background: rgba(14, 19, 31, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+    }
+
+    .telemetry-card h4 {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .metric-hero-val {
+      font-family: var(--mono);
+      font-size: 26px;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin-bottom: 4px;
+    }
+
+    .metric-hero-val.cyan { color: var(--cyan); text-shadow: 0 0 16px var(--cyan-glow); }
+    .metric-hero-val.amber { color: var(--amber); text-shadow: 0 0 16px var(--amber-glow); }
+    .metric-hero-val.emerald { color: var(--emerald); }
+    .metric-hero-val.crimson { color: var(--crimson); text-shadow: 0 0 16px var(--crimson-glow); }
+
+    .telemetry-caption {
+      font-size: 12.5px;
+      color: var(--text-subtle);
+      line-height: 1.45;
+    }
+
+    /* ==========================================================================
+       MATHEMATICAL ANATOMY BREAKDOWNS (NO LATEX FAILURES)
+       ========================================================================== */
+    .math-anatomy-card {
+      background: rgba(14, 19, 31, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      margin-top: 24px;
+    }
+
+    .equation-display-hero {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      background: #090D17;
+      border: 1px solid rgba(0, 242, 254, 0.15);
+      border-radius: var(--radius-md);
+      padding: 20px 24px;
+      margin-bottom: 20px;
+    }
+
+    .term-badge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.2s ease;
+    }
+
+    .term-badge:hover {
+      transform: translateY(-2px);
+      border-color: var(--cyan);
+      box-shadow: 0 6px 16px var(--cyan-glow);
+    }
+
+    .term-badge.cyan { border-color: rgba(0, 242, 254, 0.3); background: rgba(0, 242, 254, 0.05); }
+    .term-badge.amber { border-color: rgba(255, 159, 28, 0.3); background: rgba(255, 159, 28, 0.05); }
+    .term-badge.purple { border-color: rgba(168, 85, 247, 0.3); background: rgba(168, 85, 247, 0.05); }
+    .term-badge.crimson { border-color: rgba(255, 51, 102, 0.3); background: rgba(255, 51, 102, 0.05); }
+    .term-badge.emerald { border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.05); }
+
+    .term-math {
+      font-family: var(--mono);
+      font-size: 19px;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin-bottom: 4px;
+    }
+
+    .term-badge.cyan .term-math { color: var(--cyan); }
+    .term-badge.amber .term-math { color: var(--amber); }
+    .term-badge.purple .term-math { color: var(--purple); }
+    .term-badge.crimson .term-math { color: var(--crimson); }
+    .term-badge.emerald .term-math { color: var(--emerald); }
+
+    .term-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .plain-english-explainer {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #CBD5E1;
+      padding: 12px 18px;
+      background: rgba(255, 255, 255, 0.02);
+      border-left: 3px solid var(--cyan);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin-bottom: 12px;
+    }
+
+    .plain-english-explainer strong { color: var(--cyan); }
+
+    .analogy-explainer {
+      font-size: 14.5px;
+      line-height: 1.6;
+      color: #94A3B8;
+      padding: 12px 18px;
+      background: rgba(255, 159, 28, 0.03);
+      border-left: 3px solid var(--amber);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    }
+
+    .analogy-explainer strong { color: var(--amber); }
+
+    /* ==========================================================================
+       "BUILD ON THIS" EXPANSION PANELS (THEORY / CODE / APPLIED)
+       ========================================================================== */
+    .build-on-this-cluster {
+      background: #090D17;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      margin-top: 24px;
+    }
+
+    .bot-header {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 12px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .bot-header h4 {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-weight: 700;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .bot-header h4::before {
+      content: "✦";
+      color: var(--cyan);
+    }
+
+    .bot-tabs-strip {
+      display: flex;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(14, 19, 31, 0.5);
+    }
+
+    .bot-tab-btn {
+      padding: 12px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .bot-tab-btn:hover { color: #FFFFFF; background: rgba(255, 255, 255, 0.02); }
+    .bot-tab-btn.active {
+      color: var(--cyan);
+      border-bottom-color: var(--cyan);
+      background: rgba(0, 242, 254, 0.04);
+    }
+
+    .bot-content-pane {
+      display: none;
+      padding: 22px 24px;
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #CBD5E1;
+    }
+
+    .bot-content-pane.active { display: block; }
+
+    .code-mirror-box {
+      background: #04060A;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-sm);
+      padding: 16px 20px;
+      font-family: var(--mono);
+      font-size: 12.5px;
+      line-height: 1.7;
+      color: #E2E8F0;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .code-comment { color: #64748B; font-style: italic; }
+    .code-keyword { color: var(--purple); font-weight: 600; }
+    .code-func { color: var(--cyan); }
+    .code-num { color: var(--amber); }
+    .code-str { color: var(--emerald); }
+
+    /* ==========================================================================
+       RESEARCH VIDEO SHOWCASE & LECTURES GRID
+       ========================================================================== */
+    .video-showcase-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+      margin-top: 32px;
+    }
+    @media (min-width: 860px) {
+      .video-showcase-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .video-card {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .video-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(0, 242, 254, 0.4);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .video-thumb-container {
+      position: relative;
+      aspect-ratio: 16 / 9;
+      background: #090D17;
+      overflow: hidden;
+    }
+
+    .video-thumb-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.85;
+      transition: transform 0.3s ease;
+    }
+
+    .video-card:hover .video-thumb-container img {
+      transform: scale(1.05);
+      opacity: 1;
+    }
+
+    .play-badge {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 48px;
+      height: 48px;
+      background: rgba(0, 242, 254, 0.9);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px var(--cyan);
+      transition: transform 0.2s ease;
+    }
+
+    .video-card:hover .play-badge { transform: translate(-50%, -50%) scale(1.15); }
+    .play-badge svg { width: 20px; height: 20px; fill: #07090E; margin-left: 2px; }
+
+    .video-info-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .video-inst {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .video-title {
+      font-size: 15.5px;
+      font-weight: 700;
+      color: #FFFFFF;
+      line-height: 1.35;
+      margin-bottom: 8px;
+    }
+
+    .video-speaker {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    .video-card-link {
+      margin-top: auto;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--cyan);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ==========================================================================
+       INTUITION TO MATH TO VIDEO TO CODE PIPELINE FLOW
+       ========================================================================== */
+    .pipeline-stage-flow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin: 32px 0;
+    }
+    @media (max-width: 900px) {
+      .pipeline-stage-flow {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .flow-step-box {
+      background: rgba(14, 19, 31, 0.7);
+      border: 1px solid var(--bg-card-border);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: all 0.2s ease;
+    }
+
+    .flow-step-box:hover {
+      border-color: var(--cyan);
+      background: rgba(21, 29, 47, 0.9);
+      transform: translateY(-2px);
+    }
+
+    .flow-num-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(0, 242, 254, 0.15);
+      color: var(--cyan);
+      border: 1px solid rgba(0, 242, 254, 0.3);
+    }
+
+    .flow-step-box h4 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #FFFFFF;
+    }
+
+    .flow-step-box p {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* ==========================================================================
+       GRAND FINALE: THE TSFM ↔ WAM ↔ VLA INTERACTIVE ARCHITECTURAL DIAGRAM
+       ========================================================================== */
+    .grand-triad-card {
+      background: radial-gradient(circle at 50% 0%, rgba(21, 29, 47, 0.9) 0%, rgba(7, 9, 14, 0.98) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-lg);
+      padding: 36px 32px;
+      margin-top: 40px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+    }
+
+    .triad-selector-pills {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .triad-pill-btn {
+      padding: 12px 24px;
+      border-radius: var(--radius-full);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.25s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .triad-pill-btn:hover { color: #FFFFFF; border-color: rgba(255, 255, 255, 0.3); }
+
+    .triad-pill-btn.active.tsfm {
+      color: var(--cyan);
+      background: rgba(0, 242, 254, 0.1);
+      border-color: var(--cyan);
+      box-shadow: 0 0 20px var(--cyan-glow);
+    }
+
+    .triad-pill-btn.active.wam {
+      color: var(--amber);
+      background: rgba(255, 159, 28, 0.1);
+      border-color: var(--amber);
+      box-shadow: 0 0 20px var(--amber-glow);
+    }
+
+    .triad-pill-btn.active.vla {
+      color: var(--crimson);
+      background: rgba(255, 51, 102, 0.1);
+      border-color: var(--crimson);
+      box-shadow: 0 0 20px var(--crimson-glow);
+    }
+
+    .triad-diagram-svg-container {
+      width: 100%;
+      overflow-x: auto;
+      padding: 20px 0;
+    }
+
+    svg.triad-diagram-svg {
+      width: 100%;
+      min-width: 840px;
+      height: 340px;
+      display: block;
+    }
+
+    .triad-matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 24px;
+      font-size: 13.5px;
+    }
+
+    .triad-matrix-table th, .triad-matrix-table td {
+      padding: 14px 18px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      text-align: left;
+    }
+
+    .triad-matrix-table th {
+      background: rgba(255, 255, 255, 0.04);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .triad-label-col {
+      font-weight: 700;
+      color: #FFFFFF;
+      background: rgba(255, 255, 255, 0.02);
+      width: 22%;
+    }
+
+    /* Footer */
+    footer.cinema-footer {
+      border-top: 1px solid var(--bg-card-border);
+      padding: 60px 0;
+      margin-top: 80px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      color: var(--text-subtle);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="cinema-header">
+    <div class="brand-cluster">
+      <div class="brand-logo">
+        KAIROS
+        <span>Research Lab</span>
+      </div>
+      <div class="header-tagline">
+        Theoretical Foundations · Information State World Models
+      </div>
+    </div>
+
+    <nav class="header-nav">
+      <a href="#hidden-world" class="nav-pill active">01 Hidden World</a>
+      <a href="#observation-mechanism" class="nav-pill">02 Observation</a>
+      <a href="#information-state" class="nav-pill">03 Info State</a>
+      <a href="#prediction-rollout" class="nav-pill">04 Prediction</a>
+      <a href="#fisher-observability" class="nav-pill">05 Observability</a>
+      <a href="#pipeline-synthesis" class="nav-pill">06 Pipeline</a>
+      <a href="#grand-triad" class="nav-pill highlight">07 Grand Triad</a>
+    </nav>
+  </header>
+
+  <!-- Main Article Body -->
+  <div class="article-container">
+
+    <!-- ======================================================================
+         HERO SECTION: THE OPENING RESEARCH QUESTION
+         ====================================================================== -->
+    <section class="hero-stage">
+      <div class="hero-glow-orb"></div>
+      <div class="hero-content">
+        <div class="hero-eyebrow">
+          <span>🔬</span> Interactive Research Article & Monograph
+        </div>
+
+        <h1 class="hero-question">
+          If we can only observe a small part of a complex world, <em>how much can a machine actually learn and predict?</em>
+        </h1>
+
+        <p class="hero-thesis">
+          A definitive mathematical deconstruction of <strong>Time-Series Foundation Models (TSFM)</strong> as approximate <strong>Information State World Models</strong>. By bridging Continuous Dynamical Systems, Takens' Delay Embedding Theorem, and the Kumar-Varaiya Information State, we prove how causal attention reconstructs invisible physical realities from partial scalar observations.
+        </p>
+
+        <div class="hero-meta-strip">
+          <div class="meta-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            <span>Runge-Kutta (RK4) 60 FPS Engine</span>
+          </div>
+          <div class="meta-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            <span>5 "Watch It" Mathematical Animations</span>
+          </div>
+          <div class="meta-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <span>Grand Triad: TSFM ↔ WAM ↔ VLA</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 01: THE INTERACTIVE HIDDEN WORLD
+         ====================================================================== -->
+    <section class="research-section" id="hidden-world">
+      <div class="section-head">
+        <span class="section-kicker">Stage 01 · The Continuous Physical Reality</span>
+        <h2 class="section-title">The Interactive Hidden World</h2>
+        <p class="section-lead">
+          Reality is a high-dimensional, continuous dynamical system $s_t \in \mathcal{S} \subseteq \mathbb{R}^d$ driven by non-linear differential equations $\dot{s}_t = f(s_t, a_t, w_t)$. We model this with the canonical non-linear atmospheric convection system (Lorenz Attractor).
+        </p>
+      </div>
+
+      <!-- "Watch It 1" Callout Banner -->
+      <div class="watch-it-banner">
+        <div class="watch-it-icon">🌌</div>
+        <div class="watch-it-body">
+          <h4>Watch It 1: World Evolution in 3D State Space <span class="pulse-indicator"></span></h4>
+          <p>
+            Notice the glowing trajectory flowing along the two lobes of the butterfly attractor. The world state $s_t = (x, y, z)$ evolves continuously in 3D space according to physical laws. Adjust the <strong>Stability Slider ($\rho$)</strong> below to trigger bifurcations from stable fixed points to chaotic turbulence!
+          </p>
+        </div>
+      </div>
+
+      <!-- Cinema Lab Card 1: 3D Attractor Simulator -->
+      <div class="cinema-lab-card">
+        <div class="lab-toolbar">
+          <div class="toolbar-title-group">
+            <h3><span>🌀</span> Continuous Phase-Space Trajectory $\dot{s}_t = f(s_t)$</h3>
+            <p>Real-time 4th-order Runge-Kutta numerical integration of the hidden state</p>
+          </div>
+
+          <div class="controls-strip">
+            <div class="slider-group">
+              <label>Stability (ρ):</label>
+              <input type="range" id="stabilitySlider" min="0.5" max="40.0" step="0.5" value="28.0" oninput="updateStability(this.value)">
+              <span class="slider-val" id="stabilityVal">28.0</span>
+            </div>
+
+            <button class="action-btn" id="worldPauseBtn" onclick="toggleWorldPause()">
+              <span>⏸</span> Pause World
+            </button>
+            <button class="action-btn secondary" onclick="resetWorldSim()">
+              <span>↺</span> Reset
+            </button>
+          </div>
+        </div>
+
+        <div class="simulation-viewport-grid">
+          <div class="canvas-frame">
+            <div class="canvas-hud-overlay">
+              <span class="hud-tag cyan">Hidden Manifold ℝ³</span>
+              <span class="canvas-readout" id="stateCoordinates">s_t: [x: +0.00, y: +0.00, z: +0.00]</span>
+            </div>
+            <canvas id="hiddenWorldCanvas" class="sim-canvas"></canvas>
+          </div>
+
+          <div class="telemetry-column">
+            <div class="telemetry-card">
+              <h4>System Dynamics Regime</h4>
+              <div class="metric-hero-val cyan" id="regimeIndicator">Chaotic Attractor</div>
+              <p class="telemetry-caption">
+                At $\rho = 28.0$, two unstable fixed points produce deterministic non-periodic flow with sensitive dependence on initial conditions.
+              </p>
+            </div>
+
+            <div class="telemetry-card">
+              <h4>Maximal Lyapunov Exponent</h4>
+              <div class="metric-hero-val crimson" id="lyapunovDisp">λ₁ = +0.905</div>
+              <p class="telemetry-caption">
+                Positive exponent signals exponential trajectory divergence: $||\delta s(t)|| \approx ||\delta s(0)|| e^{\lambda_1 t}$.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Math Anatomy Card: The Hidden State Equation -->
+        <div class="math-anatomy-card">
+          <div class="equation-display-hero">
+            <div class="term-badge cyan">
+              <span class="term-math">\dot{s}(t)</span>
+              <span class="term-desc">Instantaneous Velocity</span>
+            </div>
+            <span style="font-size:24px; color:#64748B;">=</span>
+            <div class="term-badge purple">
+              <span class="term-math">f(s(t))</span>
+              <span class="term-desc">Non-linear Vector Field</span>
+            </div>
+            <span style="font-size:24px; color:#64748B;">+</span>
+            <div class="term-badge amber">
+              <span class="term-math">B \cdot a(t)</span>
+              <span class="term-desc">Exogenous Control / Action</span>
+            </div>
+            <span style="font-size:24px; color:#64748B;">+</span>
+            <div class="term-badge crimson">
+              <span class="term-math">w(t)</span>
+              <span class="term-desc">Process Noise</span>
+            </div>
+          </div>
+
+          <div class="plain-english-explainer">
+            <strong>💬 In Plain English:</strong> The hidden world moves forward continuously according to physical laws $f(\cdot)$. Where it goes next depends on where it is right now, external action forces $a(t)$, and random environmental disturbances $w(t)$.
+          </div>
+
+          <div class="analogy-explainer">
+            <strong>💡 Everyday Mental Model:</strong> The invisible atmosphere inside a hurricane. Every parcel of air has a precise pressure, temperature, and 3D velocity vector, moving according to Navier-Stokes equations whether anyone is watching or not.
+          </div>
+        </div>
+
+        <!-- "Build on This" Step 1 -->
+        <div class="build-on-this-cluster">
+          <div class="bot-header">
+            <h4>Build on This: Mathematical Grounding & Exploration</h4>
+          </div>
+          <div class="bot-tabs-strip">
+            <button class="bot-tab-btn active" onclick="switchBotTab(this, 'bot-t1')">Theoretical Proof</button>
+            <button class="bot-tab-btn" onclick="switchBotTab(this, 'bot-c1')">PyTorch Dynamical System</button>
+            <button class="bot-tab-btn" onclick="switchBotTab(this, 'bot-a1')">Real-World Case</button>
+          </div>
+
+          <div class="bot-content-pane active" id="bot-t1">
+            <p><strong>Bifurcation Analysis:</strong> For the parameter $\rho < 1$, the origin $(0,0,0)$ is a globally stable fixed point. At $\rho = 1$, a pitchfork bifurcation yields two symmetric equilibria $C^\pm = (\pm\sqrt{\beta(\rho-1)}, \pm\sqrt{\beta(\rho-1)}, \rho-1)$. When $\rho > 24.74$, a subcritical Hopf bifurcation destabilizes both fixed points, giving birth to the strange attractor with fractional Hausdorff dimension $d_H \approx 2.06$.</p>
+          </div>
+
+          <div class="bot-content-pane" id="bot-c1">
+            <div class="code-mirror-box">
+<span class="code-comment"># PyTorch RK4 Dynamical Environment Simulator</span>
+<span class="code-keyword">import</span> torch
+
+<span class="code-keyword">def</span> <span class="code-func">lorenz_vector_field</span>(s, rho=<span class="code-num">28.0</span>, sigma=<span class="code-num">10.0</span>, beta=<span class="code-num">8.0</span>/<span class="code-num">3.0</span>):
+    x, y, z = s[..., <span class="code-num">0</span>], s[..., <span class="code-num">1</span>], s[..., <span class="code-num">2</span>]
+    dx = sigma * (y - x)
+    dy = x * (rho - z) - y
+    dz = x * y - beta * z
+    <span class="code-keyword">return</span> torch.stack([dx, dy, dz], dim=-<span class="code-num">1</span>)
+
+<span class="code-keyword">def</span> <span class="code-func">rk4_step</span>(s, dt=<span class="code-num">0.01</span>, rho=<span class="code-num">28.0</span>):
+    k1 = lorenz_vector_field(s, rho)
+    k2 = lorenz_vector_field(s + <span class="code-num">0.5</span> * dt * k1, rho)
+    k3 = lorenz_vector_field(s + <span class="code-num">0.5</span> * dt * k2, rho)
+    k4 = lorenz_vector_field(s + dt * k3, rho)
+    <span class="code-keyword">return</span> s + (dt / <span class="code-num">6.0</span>) * (k1 + <span class="code-num">2</span>*k2 + <span class="code-num">2</span>*k3 + k4)
+            </div>
+          </div>
+
+          <div class="bot-content-pane" id="bot-a1">
+            <p><strong>Power Grid Frequency Dynamics:</strong> The synchronous AC electrical grid is a high-dimensional network of hundreds of coupled rotational generators. A single power plant operator only observes local phase angle and bus voltage, completely blind to rotating inertia hundreds of miles away.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 02: THE SENSOR MECHANISM & OBSERVATION EQUATION
+         ====================================================================== -->
+    <section class="research-section" id="observation-mechanism">
+      <div class="section-head">
+        <span class="section-kicker">Stage 02 · The Partial Measurement Aperture</span>
+        <h2 class="section-title">The Sensor Mechanism: How Observations Become Data</h2>
+        <p class="section-lead">
+          Between the physical universe and our neural model lies an instrument. Sensors compress continuous $d$-dimensional reality into a discrete sequence of scalar numbers through a projection operator $g(s_t)$ corrupted by noise.
+        </p>
+      </div>
+
+      <!-- "Watch It 2" Banner -->
+      <div class="watch-it-banner">
+        <div class="watch-it-icon">📡</div>
+        <div class="watch-it-body">
+          <h4>Watch It 2: The Observation Projection Beam <span class="pulse-indicator"></span></h4>
+          <p>
+            Notice the amber sensor projector beam cutting across the attractor below. It projects 3D coordinates onto a 1D measurement aperture. Adjust the <strong>Sensor Angle Slider</strong> to rotate the measurement axis, and watch how the scalar observation trace $y_t = C(\theta) s_t + \eta_t$ changes!
+          </p>
+        </div>
+      </div>
+
+      <!-- Cinema Lab Card 2: The Observation Process -->
+      <div class="cinema-lab-card">
+        <div class="lab-toolbar">
+          <div class="toolbar-title-group">
+            <h3><span>🎯</span> Sensor Projection $y_t = g(s_t) + \eta_t$</h3>
+            <p>From continuous physical trajectories to discrete sampled timepoints</p>
+          </div>
+
+          <div class="controls-strip">
+            <div class="slider-group">
+              <label>Sensor Angle (θ):</label>
+              <input type="range" id="sensorAngleSlider" min="0" max="90" step="5" value="30" oninput="updateSensorAngle(this.value)">
+              <span class="slider-val" id="sensorAngleVal">30°</span>
+            </div>
+
+            <div class="slider-group">
+              <label>Sensor Noise (σ):</label>
+              <input type="range" id="sensorNoiseSlider" min="0.0" max="2.0" step="0.1" value="0.4" oninput="updateSensorNoise(this.value)">
+              <span class="slider-val" id="sensorNoiseVal">0.4</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="simulation-viewport-grid">
+          <div class="canvas-frame">
+            <div class="canvas-hud-overlay">
+              <span class="hud-tag amber">Observed Scalar Stream y_t</span>
+              <span class="canvas-readout" id="sensorReadout">Reading: +0.00 | SNR: 18.2 dB</span>
+            </div>
+            <canvas id="sensorStreamCanvas" class="sim-canvas"></canvas>
+          </div>
+
+          <div class="telemetry-column">
+            <div class="telemetry-card">
+              <h4>Measurement Compression</h4>
+              <div class="metric-hero-val amber">3D → 1D (67% Lost)</div>
+              <p class="telemetry-caption">
+                The sensor discards 2 of the 3 orthogonal phase-space directions at every single instant.
+              </p>
+            </div>
+
+            <div class="telemetry-card">
+              <h4>Sampling Horizon</h4>
+              <div class="metric-hero-val emerald" id="tokenCountDisp">128 Timepoints</div>
+              <p class="telemetry-caption">
+                Sampled at discrete intervals $\Delta t = 0.05$. This sampled array $y_{1:t}$ is the ONLY input the foundation model receives.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Math Anatomy Card: The Observation Equation -->
+        <div class="math-anatomy-card">
+          <div class="equation-display-hero">
+            <div class="term-badge amber">
+              <span class="term-math">y_t</span>
+              <span class="term-desc">Observed Scalar Data</span>
+            </div>
+            <span style="font-size:24px; color:#64748B;">=</span>
+            <div class="term-badge cyan">
+              <span class="term-math">C(\theta)</span>
+              <span class="term-desc">Measurement Operator</span>
+            </div>
+            <span style="font-size:20px; color:#64748B;">\cdot</span>
+            <div class="term-badge purple">
+              <span class="term-math">s_t</span>
+              <span class="term-desc">True Hidden State</span>
+            </div>
+            <span style="font-size:24px; color:#64748B;">+</span>
+            <div class="term-badge crimson">
+              <span class="term-math">\eta_t</span>
+              <span class="term-desc">Gaussian Sensor Noise</span>
+            </div>
+          </div>
+
+          <div class="plain-english-explainer">
+            <strong>💬 In Plain English:</strong> What our computer sees ($y_t$) is a flattened, one-dimensional projection ($C s_t$) corrupted by measurement noise ($\eta_t$). At any single timestamp, $y_t$ is completely ambiguous!
+          </div>
+
+          <div class="analogy-explainer">
+            <strong>💡 Everyday Mental Model:</strong> The shadow of a rotating 3D bird on a wall. Looking at the shadow at one freeze-frame moment cannot tell you whether the bird is flying toward you or away from you.
+          </div>
+        </div>
+
+        <!-- "Build on This" Step 2 -->
+        <div class="build-on-this-cluster">
+          <div class="bot-header">
+            <h4>Build on This: Sensor Mechanics & Sampling Theory</h4>
+          </div>
+          <div class="bot-tabs-strip">
+            <button class="bot-tab-btn active" onclick="switchBotTab(this, 'bot-t2')">Theory: Loss of Degrees of Freedom</button>
+            <button class="bot-tab-btn" onclick="switchBotTab(this, 'bot-c2')">PyTorch Sensor Operator</button>
+            <button class="bot-tab-btn" onclick="switchBotTab(this, 'bot-a2')">Aerospace & Satellite Drift</button>
+          </div>
+
+          <div class="bot-content-pane active" id="bot-t2">
+            <p><strong>Singular Measurement Projections:</strong> The projection matrix $C \in \mathbb{R}^{1 \times 3}$ has a 2-dimensional null space $\ker(C) = \{s \in \mathbb{R}^3 : Cs = 0\}$. Any hidden state perturbations $\delta s \in \ker(C)$ produce identically zero change in observation $y_t$. Without historical context, instantaneous inversion of $y_t \to s_t$ is fundamentally mathematically ill-posed.</p>
+          </div>
+
+          <div class="bot-content-pane" id="bot-c2">
+            <div class="code-mirror-box">
+<span class="code-comment"># PyTorch Parameterized Sensor Measurement Module</span>
+<span class="code-keyword">import</span> torch
+<span class="code-keyword">import</span> torch.nn <span class="code-keyword">as</span> nn
+
+<span class="code-keyword">class</span> <span class="code-func">SensorMeasurementOperator</span>(nn.Module):
+    <span class="code-keyword">def</span> <span class="code-func">__init__</span>(self, theta_deg=<span class="code-num">30.0</span>, noise_std=<span class="code-num">0.4</span>):
+        <span class="code-func">super</span>().__init__()
+        rad = torch.deg2rad(torch.tensor(theta_deg))
+        <span class="code-comment"># Measurement row vector C = [cos(θ), sin(θ), 0]</span>
+        self.register_buffer(<span class="code-str">'C'</span>, torch.tensor([torch.cos(rad), torch.sin(rad), <span class="code-num">0.0</span>]))
+        self.noise_std = noise_std
+
+    <span class="code-keyword">def</span> <span class="code-func">forward</span>(self, s_trajectory):
+        <span class="code-comment"># s_trajectory: [Batch, Time, 3] -> y: [Batch, Time]</span>
+        clean_obs = torch.einsum(<span class="code-str">'btk,k->bt'</span>, s_trajectory, self.C)
+        noise = torch.randn_like(clean_obs) * self.noise_std
+        <span class="code-keyword">return</span> clean_obs + noise
+            </div>
+          </div>
+
+          <div class="bot-content-pane" id="bot-a2">
+            <p><strong>NASA Mars Rover IMUs & Pitot Static Tubes:</strong> When an aircraft encounters high-altitude icing, Pitot static ports can become clogged. The flight computer only observes an artificial flatline in airspeed $y_t$, while the true physical airframe state $s_t$ (angle of attack and pitch rate) continues evolving dynamically. Disentangling sensor failure from state change requires temporal context.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 03: COMPRESSION INTO AN INFORMATION STATE
+         ====================================================================== -->
+    <section class="research-section" id="information-state">
+      <div class="section-head">
+        <span class="section-kicker">Stage 03 · The Theoretical Core</span>
+        <h2 class="section-title">Compression into an Information State</h2>
+        <p class="section-lead">
+          Because a single point $y_t$ is semantically ambiguous, how can a machine recover the truth? Control theory answers: by computing an <strong>information state</strong> $\sigma_t = \psi(y_{1:t})$ that acts as a sufficient statistic for the past.
+        </p>
+      </div>
+
+      <!-- "Watch It 3" Banner -->
+      <div class="watch-it-banner">
+        <div class="watch-it-icon">🧬</div>
+        <div class="watch-it-body">
+          <h4>Watch It 3: Takens' Inversion & Latent Information State <span class="pulse-indicator"></span></h4>
+          <p>
+            Watch the green trajectory below! It takes the 1D scalar observation stream $y_t$ and passes it through an overcomplete delay buffer $[y_t, y_{t-\tau}, y_{t-2\tau}]$. Watch how the original 3D butterfly attractor re-emerges out of pure 1D scalar memory!
+          </p>
+        </div>
+      </div>
+
+      <!-- Cinema Lab Card 3: Takens Inversion & Latent State -->
+      <div class="cinema-lab-card">
+        <div class="lab-toolbar">
+          <div class="toolbar-title-group">
+            <h3><span>🪞</span> Attractor Inversion via Memory $\sigma_t = \psi(y_{1:t})$</h3>
+            <p>Takens' Delay Embedding Theorem proves memory inverts partial observability</p>
+          </div>
+
+          <div class="controls-strip">
+            <div class="slider-group">
+              <label>History Window (L):</label>
+              <input type="range" id="lookbackSlider" min="16" max="128" step="8" value="64" oninput="updateLookback(this.value)">
+              <span class="slider-val" id="lookbackVal">64</span>
+            </div>
+
+            <div class="slider-group">
+              <label>Delay Lag (τ):</label>
+              <input type="range" id="delayLagSlider" min="1" max="12" step="1" value="4" oninput="updateDelayLag(this.value)">
+              <span class="slider-val" id="delayLagVal">4</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="simulation-viewport-grid">
+          <div class="canvas-frame">
+            <div class="canvas-hud-overlay">
+              <span class="hud-tag emerald">Reconstructed Attractor σ_t ∈ ℝ³</span>
+              <span class="canvas-readout" id="takensCoord">Delay Vector: [y_t, y_{t-τ}, y_{t-2τ}]</span>
+            </div>
+            <canvas id="takensReconstructionCanvas" class="sim-canvas"></canvas>
+          </div>
+
+          <div class="telemetry-column">
+            <div class="telemetry-card">
+              <h4>Takens' Condition Check</h4>
+              <div class="metric-hero-val emerald" id="takensConditionStatus">Satisfied (L > 2d)</div>
+              <p class="telemetry-caption">
+                Whitney's theorem guarantees a smooth diffeomorphism (1-to-1 invertible mapping) between the delay buffer and the true hidden manifold.
+              </p>
+            </div>
+
+            <div class="telemetry-card">
+              <h4>Neural Information State</h4>
+              <div class="metric-hero-val purple">Transformer Context</div>
+              <p class="telemetry-caption">
+                The TSFM's causal multi-head self-attention stack across lookback patches functions as an adaptive, continuous non-linear Takens embedding!
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Math Anatomy Card: The Kumar-Varaiya Information State -->
+        <div class="math-anatomy-card">
+          <div class="equation-display-hero">
+            <div class="term-badge purple">
+              <span class="term-math">\sigma_t</span>
+              <span class="term-desc">Information State</span>
+            </div>
+            <span style="font-size:24px; color:#64748B;">=</span>
+            <div class="term-badge cyan">
+              <span class="term-math">\psi(y_{1:t})</span>
+              <span class="term-desc">Historical Compression</span>
+            </div>
+            <span style="font-size:24px; color:#64748B;">;</span>
+            <div class="term-badge emerald">
+              <span class="term-math">\sigma_{t+1}</span>
+              <span class="term-desc">Recursive Update</span>
+            </div>
+            <span style="font-size:24px; color:#64748B;">=</span>
+            <div class="term-badge amber">
+              <span class="term-math">\rho(\sigma_t, y_{t+1})</span>
+              <span class="term-desc">Filter Transition</span>
+            </div>
+          </div>
+
+          <div class="plain-english-explainer">
+            <strong>💬 In Plain English:</strong> An information state ($\sigma_t$) is the ultimate mathematical summary. It throws away the giant raw history of every single past observation, retaining only what is needed to calculate the probability distribution of the future!
+          </div>
+
+          <div class="analogy-explainer">
+            <strong>💡 Everyday Mental Model:</strong> The scoreboard in a chess game. You don't need to re-read the transcript of all 80 previous moves to know what to do; the current board position and piece count contain all sufficient information.
+          </div>
+        </div>
+
+        <!-- "Build on This" Step 3 -->
+        <div class="build-on-this-cluster">
+          <div class="bot-header">
+            <h4>Build on This: Information State Foundations & Attention Mechanics</h4>
+          </div>
+          <div class="bot-tabs-strip">
+            <button class="bot-tab-btn active" onclick="switchBotTab(this, 'bot-t3')">Whitney & Takens Diffeomorphism</button>
+            <button class="bot-tab-btn" onclick="switchBotTab(this, 'bot-c3')">PyTorch Attention Information State</button>
+            <button class="bot-tab-btn" onclick="switchBotTab(this, 'bot-a3')">Quantitative Finance & LOB Depth</button>
+          </div>
+
+          <div class="bot-content-pane active" id="bot-t3">
+            <p><strong>Whitney's Embedding & Takens (1981):</strong> Let $\mathcal{M}$ be a compact manifold of dimension $d$. For generic dynamical systems $\phi^t$ and observation functions $h: \mathcal{M} \to \mathbb{R}$, the delay coordinate map $\Phi_{(f,h)}(s) = [h(s), h(\phi^{-\tau}(s)), \dots, h(\phi^{-(2d)\tau}(s))]^T$ is a smooth embedding (diffeomorphism) into $\mathbb{R}^{2d+1}$. Therefore, causal attention across $L > 2d$ tokens in a TSFM can invert partial observability with zero loss of topological invariants.</p>
+          </div>
+
+          <div class="bot-content-pane" id="bot-c3">
+            <div class="code-mirror-box">
+<span class="code-comment"># PyTorch Causal Self-Attention Information State Extractor</span>
+<span class="code-keyword">import</span> torch
+<span class="code-keyword">import</span> torch.nn <span class="code-keyword">as</span> nn
+
+<span class="code-keyword">class</span> <span class="code-func">TSFMInformationStateEncoder</span>(nn.Module):
+    <span class="code-keyword">def</span> <span class="code-func">__init__</span>(self, patch_len=<span class="code-num">16</span>, d_model=<span class="code-num">256</span>, nheads=<span class="code-num">4</span>):
+        <span class="code-func">super</span>().__init__()
+        self.patch_proj = nn.Linear(patch_len, d_model)
+        self.encoder_layer = nn.TransformerEncoderLayer(
+            d_model=d_model, nhead=nheads, dim_feedforward=<span class="code-num">512</span>, batch_first=True
+        )
+
+    <span class="code-keyword">def</span> <span class="code-func">forward</span>(self, y_patches):
+        <span class="code-comment"># y_patches: [Batch, NumPatches, PatchLen]</span>
+        tokens = self.patch_proj(y_patches)
+        <span class="code-comment"># Causal masking preserves the Kumar-Varaiya filtration: σ_t = ψ(y_{1:t})</span>
+        seq_len = tokens.size(<span class="code-num">1</span>)
+        mask = nn.Transformer.generate_square_subsequent_mask(seq_len).to(tokens.device)
+        h = self.encoder_layer(tokens, mask=mask)
+        sigma_t = h[:, -<span class="code-num">1</span>, :] <span class="code-comment"># Terminal token serves as current information state σ_t</span>
+        <span class="code-keyword">return</span> sigma_t
+            </div>
+          </div>
+
+          <div class="bot-content-pane" id="bot-a3">
+            <p><strong>High-Frequency Trading & Limit Order Books:</strong> A quantitative market maker only sees top-of-book scalar trades and quotes $y_t$. However, hidden institutional execution algorithms (TWAP/VWAP) represent latent state dimensions. By computing an information state across microsecond trade ticks, the model recovers the latent supply-demand imbalance without seeing the full hidden book.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 04: PREDICTION & UNCERTAINTY ROLLOUT
+         ====================================================================== -->
+    <section class="research-section" id="prediction-rollout">
+      <div class="section-head">
+        <span class="section-kicker">Stage 04 · The Autoregressive Forward Horizon</span>
+        <h2 class="section-title">Prediction: Decoding the Future Trajectory</h2>
+        <p class="section-lead">
+          Equipped with the information state $\sigma_t$, the foundation model evaluates the predictive distribution $p_\theta(y_{t+1:t+H} \mid \sigma_t)$. In chaotic systems, predictions naturally diverge into expanding uncertainty cones.
+        </p>
+      </div>
+
+      <!-- "Watch It 4" Banner -->
+      <div class="watch-it-banner">
+        <div class="watch-it-icon">🔮</div>
+        <div class="watch-it-body">
+          <h4>Watch It 4: Future Rollout & Uncertainty Cones <span class="pulse-indicator"></span></h4>
+          <p>
+            Observe the red forecasting line and shaded probability envelope ($P_{10} - P_{90}$) extending from the observation boundary. Because the hidden world has positive Lyapunov exponents, uncertainty expands exponentially over time!
+          </p>
+        </div>
+      </div>
+
+      <!-- Cinema Lab Card 4: Predictive Rollout -->
+      <div class="cinema-lab-card">
+        <div class="lab-toolbar">
+          <div class="toolbar-title-group">
+            <h3><span>📈</span> Autoregressive Horizon Rollout $\hat{y}_{t+1:t+H} \sim p_\theta(\cdot \mid \sigma_t)$</h3>
+            <p>Multi-step probabilistic forecasting with calibrated quantiles</p>
+          </div>
+
+          <div class="controls-strip">
+            <div class="slider-group">
+              <label>Horizon (H):</label>
+              <input type="range" id="horizonSlider" min="8" max="64" step="4" value="32" oninput="updateHorizon(this.value)">
+              <span class="slider-val" id="horizonVal">32</span>
+            </div>
+
+            <button class="action-btn secondary" id="uncertaintyToggleBtn" onclick="toggleUncertaintyCone()">
+              Hide Uncertainty Cone
+            </button>
+          </div>
+        </div>
+
+        <div class="simulation-viewport-grid">
+          <div class="canvas-frame">
+            <div class="canvas-hud-overlay">
+              <span class="hud-tag crimson">Forecast Horizon H = 32</span>
+              <span class="canvas-readout" id="forecastMetrics">MAE: 0.142 | Pinball WQL: 0.088</span>
+            </div>
+            <canvas id="predictionCanvas" class="sim-canvas"></canvas>
+          </div>
+
+          <div class="telemetry-column">
+            <div class="telemetry-card">
+              <h4>Lyapunov Horizon Limit</h4>
+              <div class="metric-hero-val crimson">t_L ≈ 1 / λ₁</div>
+              <p class="telemetry-caption">
+                No model, regardless of parameter scale, can make deterministic point forecasts beyond the Lyapunov time of a chaotic system. Probabilistic quantiles are mathematically mandatory.
+              </p>
+            </div>
+
+            <div class="telemetry-card">
+              <h4>Zero-Shot ICF Boost</h4>
+              <div class="metric-hero-val emerald">-6.6% Error</div>
+              <p class="telemetry-caption">
+                In-Context Fine-Tuning (TimesFM-ICF) conditions on related in-context examples with <code>[SEP]</code> tokens to compress the uncertainty cone.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- "Build on This" Step 4 -->
+        <div class="build-on-this-cluster">
+          <div class="bot-header">
+            <h4>Build on This: Kolmogorov-Sinai Limits & Probabilistic Heads</h4>
+          </div>
+          <div class="bot-tabs-strip">
+            <button class="bot-tab-btn active" onclick="switchBotTab(this, 'bot-t4')">Kolmogorov-Sinai Entropy</button>
+            <button class="bot-tab-btn" onclick="switchBotTab(this, 'bot-c4')">PyTorch Quantile Forecast Head</button>
+            <button class="bot-tab-btn" onclick="switchBotTab(this, 'bot-a4')">Wind Farm Gust Curtailment</button>
+          </div>
+
+          <div class="bot-content-pane active" id="bot-t4">
+            <p><strong>Pesin Identity & Information Creation:</strong> In deterministic dynamical systems, the Kolmogorov-Sinai entropy $h_{KS}$ equals the sum of positive Lyapunov exponents: $h_{KS} = \sum_{\lambda_i > 0} \lambda_i$. This represents the exact rate at which new information is generated by the system. Any model predicting past the Lyapunov horizon $t_L = 1/\lambda_1$ produces output dominated by noise unless it models the full distribution $p(y_{t+H} \mid \sigma_t)$.</p>
+          </div>
+
+          <div class="bot-content-pane" id="bot-c4">
+            <div class="code-mirror-box">
+<span class="code-comment"># PyTorch Multi-Quantile Forecasting Head (Pinball Loss)</span>
+<span class="code-keyword">import</span> torch
+<span class="code-keyword">import</span> torch.nn <span class="code-keyword">as</span> nn
+
+<span class="code-keyword">class</span> <span class="code-func">QuantileForecastHead</span>(nn.Module):
+    <span class="code-keyword">def</span> <span class="code-func">__init__</span>(self, d_model=<span class="code-num">256</span>, horizon=<span class="code-num">32</span>, quantiles=[<span class="code-num">0.1</span>, <span class="code-num">0.5</span>, <span class="code-num">0.9</span>]):
+        <span class="code-func">super</span>().__init__()
+        self.quantiles = quantiles
+        self.proj = nn.Linear(d_model, horizon * <span class="code-func">len</span>(quantiles))
+        self.horizon = horizon
+
+    <span class="code-keyword">def</span> <span class="code-func">forward</span>(self, sigma_t):
+        <span class="code-comment"># Returns [Batch, Horizon, 3] corresponding to P10, P50 (median), P90</span>
+        raw = self.proj(sigma_t)
+        <span class="code-keyword">return</span> raw.view(-<span class="code-num">1</span>, self.horizon, <span class="code-func">len</span>(self.quantiles))
+
+<span class="code-keyword">def</span> <span class="code-func">pinball_loss</span>(y_pred, y_true, q=<span class="code-num">0.1</span>):
+    diff = y_true - y_pred
+    <span class="code-keyword">return</span> torch.maximum(q * diff, (q - <span class="code-num">1.0</span>) * diff).mean()
+            </div>
+          </div>
+
+          <div class="bot-content-pane" id="bot-a4">
+            <p><strong>Renewable Wind Turbine Gust Management:</strong> High-speed turbulent wind shear can damage turbine pitch bearings if not anticipated 15 seconds in advance. By rolling out the $P_{90}$ upper quantile of wind velocity, turbine control units feather rotor blades ahead of extreme aerodynamic torque spikes.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 05: FISHER INFORMATION & OBSERVABILITY
+         ====================================================================== -->
+    <section class="research-section" id="fisher-observability">
+      <div class="section-head">
+        <span class="section-kicker">Stage 05 · The Limits of Learnability</span>
+        <h2 class="section-title">Fisher Information Matrix & Observability Gramian</h2>
+        <p class="section-lead">
+          When is it mathematically impossible for a foundation model to predict? When the <strong>Observability Gramian</strong> becomes rank-deficient: the sensor has a blind spot, hiding an entire subspace of the world's dynamics.
+        </p>
+      </div>
+
+      <!-- "Watch It 5" Banner -->
+      <div class="watch-it-banner">
+        <div class="watch-it-icon">📐</div>
+        <div class="watch-it-body">
+          <h4>Watch It 5: The Observability Ellipsoid & Blind Spots <span class="pulse-indicator"></span></h4>
+          <p>
+            Drag the <strong>Sensor Coverage Slider</strong> below to see the Observability Ellipsoid collapse! When the condition number diverges to infinity, the Fisher Information Matrix vanishes along an unobservable axis, causing the foundation model's forecast variance to explode.
+          </p>
+        </div>
+      </div>
+
+      <!-- Cinema Lab Card 5: Fisher Information & Observability -->
+      <div class="cinema-lab-card">
+        <div class="lab-toolbar">
+          <div class="toolbar-title-group">
+            <h3><span>🧮</span> Observability Gramian $W_o = \int_0^T e^{A^T t} C^T C e^{At} dt$</h3>
+            <p>Eigenvalue geometry determining lower bounds on state estimation variance (Cramer-Rao)</p>
+          </div>
+
+          <div class="controls-strip">
+            <div class="slider-group">
+              <label>Sensor Coverage:</label>
+              <input type="range" id="coverageSlider" min="0.05" max="1.0" step="0.05" value="0.85" oninput="updateCoverage(this.value)">
+              <span class="slider-val" id="coverageVal">85%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="simulation-viewport-grid">
+          <div class="canvas-frame">
+            <div class="canvas-hud-overlay">
+              <span class="hud-tag cyan">Observability Ellipsoid in ℝ³</span>
+              <span class="canvas-readout" id="gramianRank">Rank(O) = 3 (Full Observability)</span>
+            </div>
+            <canvas id="observabilityCanvas" class="sim-canvas"></canvas>
+          </div>
+
+          <div class="telemetry-column">
+            <div class="telemetry-card">
+              <h4>Condition Number $\kappa(W_o)$</h4>
+              <div class="metric-hero-val cyan" id="condNumberDisp">1.24 (Well-Conditioned)</div>
+              <p class="telemetry-caption">
+                Ratio of largest to smallest eigenvalue $\lambda_{\max} / \lambda_{\min}$. Low values guarantee stable inversion.
+              </p>
+            </div>
+
+            <div class="telemetry-card">
+              <h4>Cramer-Rao Lower Bound</h4>
+              <div class="metric-hero-val emerald">Cov(ŝ) ≥ (FIM)⁻¹</div>
+              <p class="telemetry-caption">
+                The minimum attainable error covariance for any estimator. Foundation models approach this bound asymptotically as pre-training tokens scale.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- "Build on This" Step 5 -->
+        <div class="build-on-this-cluster">
+          <div class="bot-header">
+            <h4>Build on This: Kalman Observability Rank & Cramer-Rao Geometry</h4>
+          </div>
+          <div class="bot-tabs-strip">
+            <button class="bot-tab-btn active" onclick="switchBotTab(this, 'bot-t5')">Kalman Rank Condition</button>
+            <button class="bot-tab-btn" onclick="switchBotTab(this, 'bot-c5')">PyTorch FIM & Gramian Analyzer</button>
+            <button class="bot-tab-btn" onclick="switchBotTab(this, 'bot-a5')">EV Battery Lithium Plating</button>
+          </div>
+
+          <div class="bot-content-pane active" id="bot-t5">
+            <p><strong>Observability Matrix & Cramer-Rao Bound:</strong> For linear system $(A, C)$, the observability matrix $\mathcal{O} = [C^T, (CA)^T, \dots, (CA^{n-1})^T]^T$ must satisfy $\text{rank}(\mathcal{O}) = n$. By the Cramer-Rao Inequality, the covariance of any unbiased estimate $\hat{s}_t$ is bounded below by the inverse Fisher Information Matrix $\mathcal{I}_t^{-1}$. When an eigenvalue $\lambda_i(W_o) \to 0$, the corresponding estimation error $\mathbb{E}[(\hat{s}_i - s_i)^2] \to \infty$.</p>
+          </div>
+
+          <div class="bot-content-pane" id="bot-c5">
+            <div class="code-mirror-box">
+<span class="code-comment"># PyTorch Observability Gramian & Fisher Information Inspector</span>
+<span class="code-keyword">import</span> torch
+
+<span class="code-keyword">def</span> <span class="code-func">compute_observability_gramian</span>(A, C, T_steps=<span class="code-num">50</span>, dt=<span class="code-num">0.02</span>):
+    <span class="code-comment"># A: [n, n], C: [m, n]</span>
+    n = A.size(<span class="code-num">0</span>)
+    Wo = torch.zeros(n, n, device=A.device)
+    expAt = torch.eye(n, device=A.device)
+    dA = torch.matrix_exp(A * dt)
+
+    <span class="code-keyword">for</span> _ <span class="code-keyword">in</span> <span class="code-func">range</span>(T_steps):
+        integrand = expAt.T @ C.T @ C @ expAt
+        Wo += integrand * dt
+        expAt = expAt @ dA
+
+    eigvals, _ = torch.linalg.eigh(Wo)
+    cond_number = eigvals[-<span class="code-num">1</span>] / torch.clamp(eigvals[<span class="code-num">0</span>], min=<span class="code-num">1e-7</span>)
+    <span class="code-keyword">return</span> Wo, eigvals, cond_number
+            </div>
+          </div>
+
+          <div class="bot-content-pane" id="bot-a5">
+            <p><strong>Electric Vehicle Battery Health Diagnostics:</strong> During fast DC charging, metallic lithium plating can occur inside the graphite anode, posing a short-circuit fire hazard. Direct internal chemical sensors cannot be inserted into sealed cells. The BMS foundation model must estimate anode overpotential using only external terminal voltage and current—requiring high observability Gramian conditioning.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 06: CREDIBLE RESEARCH TALKS & VIDEO SHOWCASE
+         ====================================================================== -->
+    <section class="research-section" id="pipeline-synthesis">
+      <div class="section-head">
+        <span class="section-kicker">Stage 06 · Scholarly Discourse & Pipeline Synthesis</span>
+        <h2 class="section-title">The Scientific Pipeline: Intuition → Math → Video → Code</h2>
+        <p class="section-lead">
+          Connect physical intuition with rigorous proofs, verified video lectures, and executable PyTorch code. Explore research talks from world leaders bridging dynamical systems, information states, and foundation models.
+        </p>
+      </div>
+
+      <!-- Intuition to Math to Video to Code Flow -->
+      <div class="pipeline-stage-flow">
+        <div class="flow-step-box">
+          <div class="flow-num-badge">1</div>
+          <h4>Intuition</h4>
+          <p>The universe evolves along continuous attractors. Our sensors capture noisy, partial shadows.</p>
+        </div>
+        <div class="flow-step-box">
+          <div class="flow-num-badge">2</div>
+          <h4>Mathematics</h4>
+          <p>Takens' theorem & Kumar-Varaiya prove historical memory $\psi(y_{1:t})$ reconstructs the true manifold.</p>
+        </div>
+        <div class="flow-step-box">
+          <div class="flow-num-badge">3</div>
+          <h4>Video Lectures</h4>
+          <p>Watch foundational lectures on attractor embeddings, TimesFM, and JEPA world architectures.</p>
+        </div>
+        <div class="flow-step-box">
+          <div class="flow-num-badge">4</div>
+          <h4>Executable Code</h4>
+          <p>Implement the entire pipeline: RK4 physics, sensor projection, transformer encoding, and quantile loss.</p>
+        </div>
+      </div>
+
+      <!-- Curated Video Showcase -->
+      <div class="video-showcase-grid">
+        <!-- Video 1: Simons Institute / Steve Brunton -->
+        <a class="video-card" href="https://www.youtube.com/results?search_query=simons+institute+dynamical+systems+machine+learning" target="_blank" rel="noopener noreferrer">
+          <div class="video-thumb-container">
+            <img src="https://storage.googleapis.com/gweb-research2023-media/images/RA_Algorithms-and-Theory.width-800.png" alt="Simons Institute Lecture">
+            <div class="play-badge"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+          </div>
+          <div class="video-info-body">
+            <span class="video-inst">Simons Institute for the Theory of Computing</span>
+            <h4 class="video-title">Machine Learning for Dynamical Systems & Attractor Embedding</h4>
+            <span class="video-speaker">Prof. Steve Brunton · University of Washington</span>
+            <div class="video-card-link">Watch Lecture on YouTube ↗</div>
+          </div>
+        </a>
+
+        <!-- Video 2: Google Research / TimesFM -->
+        <a class="video-card" href="https://icml.cc/virtual/2025/poster/43707" target="_blank" rel="noopener noreferrer">
+          <div class="video-thumb-container">
+            <img src="https://storage.googleapis.com/gweb-research2023-media/images/RA_Natural-Language-Processing.width-800.png" alt="Google Research ICML Poster">
+            <div class="play-badge"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+          </div>
+          <div class="video-info-body">
+            <span class="video-inst">Google Research · ICML 2025</span>
+            <h4 class="video-title">In-Context Fine-Tuning for Time-Series Foundation Models</h4>
+            <span class="video-speaker">Rajat Sen & Yichen Zhou · Google Research</span>
+            <div class="video-card-link">View ICML Paper & Presentation ↗</div>
+          </div>
+        </a>
+
+        <!-- Video 3: DeepMind / World Models -->
+        <a class="video-card" href="https://www.youtube.com/results?search_query=yann+lecun+world+models+jepa" target="_blank" rel="noopener noreferrer">
+          <div class="video-thumb-container">
+            <img src="https://storage.googleapis.com/gweb-research2023-media/images/RA_Machine-Intelligence.width-800.png" alt="World Models Lecture">
+            <div class="play-badge"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+          </div>
+          <div class="video-info-body">
+            <span class="video-inst">Meta AI & Courant Institute</span>
+            <h4 class="video-title">From Predictive World Models to Autonomous Intelligence</h4>
+            <span class="video-speaker">Prof. Yann LeCun · Turing Award Laureate</span>
+            <div class="video-card-link">Watch Keynote on YouTube ↗</div>
+          </div>
+        </a>
+      </div>
+
+      <!-- "Build on This" Step 6 -->
+      <div class="build-on-this-cluster">
+        <div class="bot-header">
+          <h4>Build on This: Pedagogical Synthesis & End-to-End Experimentation</h4>
+        </div>
+        <div class="bot-tabs-strip">
+          <button class="bot-tab-btn active" onclick="switchBotTab(this, 'bot-t6')">Complete Theoretical Synthesis</button>
+          <button class="bot-tab-btn" onclick="switchBotTab(this, 'bot-c6')">End-to-End Pipeline Script</button>
+          <button class="bot-tab-btn" onclick="switchBotTab(this, 'bot-a6')">Deployment Verification Checklist</button>
+        </div>
+
+        <div class="bot-content-pane active" id="bot-t6">
+          <p><strong>The Complete Mathematical Thread:</strong> $\dot{s} = f(s) \xrightarrow{C} y_t = Cs_t + \eta_t \xrightarrow{\text{Takens}} \sigma_t = \psi(y_{1:t}) \xrightarrow{\text{Transformer}} \hat{y}_{t+1:t+H} \sim p(\cdot \mid \sigma_t)$. The foundation model acts as a universal approximator of the infinite-horizon Kalman filter without requiring access to the physical system equations $(A, f, C)$.</p>
+        </div>
+
+        <div class="bot-content-pane" id="bot-c6">
+          <div class="code-mirror-box">
+<span class="code-comment"># End-to-End TSFM Training Pipeline Summary</span>
+<span class="code-comment"># 1. Simulate: s_traj = rk4_step(s, dt=0.01)</span>
+<span class="code-comment"># 2. Project:  y_obs = C @ s_traj + noise</span>
+<span class="code-comment"># 3. Encode:   sigma_t = TSFMInformationStateEncoder(y_obs[:, :T_lookback])</span>
+<span class="code-comment"># 4. Predict:  quantiles = QuantileForecastHead(sigma_t)</span>
+<span class="code-comment"># 5. Optimize: loss = pinball_loss(quantiles, y_obs[:, T_lookback:T_lookback+H])</span>
+          </div>
+        </div>
+
+        <div class="bot-content-pane" id="bot-a6">
+          <p><strong>Verification Protocol:</strong> When deploying foundation models to safety-critical infrastructure, evaluate the condition number $\kappa(W_o)$ in real time. If $\kappa(W_o) > 10^3$, flag sensor degradation and widen forecasting confidence intervals to prevent catastrophic false-positive control actions.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         GRAND FINALE: THE TSFM ↔ WAM ↔ VLA INTERACTIVE ARCHITECTURE MAP
+         ====================================================================== -->
+    <section class="research-section" id="grand-triad">
+      <div class="section-head">
+        <span class="section-kicker">Stage 07 · The Complete Synthesis</span>
+        <h2 class="section-title">The Grand Triad: TSFM vs. WAM vs. VLA</h2>
+        <p class="section-lead">
+          AI literature frequently conflates temporal predictors, world simulators, and embodied robots. Below is the definitive interactive architectural diagram illustrating their exact boundaries, interfaces, and mathematical distinctions.
+        </p>
+      </div>
+
+      <div class="grand-triad-card">
+        <div class="triad-selector-pills">
+          <button class="triad-pill-btn tsfm active" onclick="selectTriadMode('tsfm', this)">
+            <span>✦</span> 1. Time-Series Foundation Model (TSFM)
+          </button>
+          <button class="triad-pill-btn wam" onclick="selectTriadMode('wam', this)">
+            <span>⚙</span> 2. World Action Model (WAM)
+          </button>
+          <button class="triad-pill-btn vla" onclick="selectTriadMode('vla', this)">
+            <span>🤖</span> 3. Vision-Language-Action (VLA)
+          </button>
+        </div>
+
+        <div class="triad-diagram-svg-container">
+          <svg id="triadSvg" class="triad-diagram-svg" viewBox="0 0 1000 340"></svg>
+        </div>
+
+        <!-- Dynamic Explainer Box -->
+        <div class="math-anatomy-card" id="triadExplainerBox" style="margin-top:0;">
+          <h3 id="triadModeTitle" style="font-family:var(--serif); font-size:26px; color:var(--cyan); margin-bottom:8px;">
+            Time-Series Foundation Model (TSFM)
+          </h3>
+          <p id="triadModeDesc" class="plain-p" style="margin-bottom:14px;">
+            A passive sequence predictor $p_\theta(y_{t+1:t+H} \mid y_{1:t})$. It computes an approximate information state $\sigma_t$ over continuous sensor measurements without taking actions or intervening in the environment.
+          </p>
+          <div class="equation-display-hero" id="triadFormulaRow" style="padding:12px; margin-bottom:0;">
+            <span style="font-family:var(--mono); color:var(--cyan); font-size:16px;">Mathematical Formulation: p_θ(y_{t+1:t+H} | y_{1:t})</span>
+          </div>
+        </div>
+
+        <!-- Systematic Comparison Matrix -->
+        <div style="margin-top:36px;">
+          <h4 style="font-size:16px; font-weight:700; color:#FFFFFF; margin-bottom:14px; text-transform:uppercase; letter-spacing:1px;">
+            Systematic Architectural Comparison Matrix
+          </h4>
+
+          <div style="overflow-x:auto;">
+            <table class="triad-matrix-table">
+              <thead>
+                <tr>
+                  <th class="triad-label-col">Dimension</th>
+                  <th style="color:var(--cyan);">1. TSFM (Passive)</th>
+                  <th style="color:var(--amber);">2. WAM (Action-Conditioned)</th>
+                  <th style="color:var(--crimson);">3. VLA (Embodied Policy)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="triad-label-col">Primary Input</td>
+                  <td>1D/Multi-D Numerical Sensor Series $y_{1:t}$</td>
+                  <td>History $\sigma_t$ + Candidate Action $a_t$</td>
+                  <td>RGB Video $I_t$ + Language Prompt $\mathcal{L}$</td>
+                </tr>
+                <tr>
+                  <td class="triad-label-col">Information State</td>
+                  <td>$\sigma_t \approx \phi(y_{1:t})$ (Passive Filter)</td>
+                  <td>$\sigma_{t+1} \approx \mathcal{T}(\sigma_t, a_t)$ (Transition)</td>
+                  <td>Multimodal Visuomotor Embedding</td>
+                </tr>
+                <tr>
+                  <td class="triad-label-col">Output / Target</td>
+                  <td>Future Trajectory $\hat{y}_{t+1:t+H} + \text{Quantiles}$</td>
+                  <td>Simulated Next State $\hat{s}_{t+1}$ + Reward $\hat{r}_t$</td>
+                  <td>Continuous Motor Torques $a_t \in \mathbb{R}^7$</td>
+                </tr>
+                <tr>
+                  <td class="triad-label-col">Causal Intervention</td>
+                  <td><span style="color:#94A3B8;">None (Observational Only)</span></td>
+                  <td><span style="color:var(--amber); font-weight:600;">Counterfactual Rollouts ($do(a_t)$)</span></td>
+                  <td><span style="color:var(--crimson); font-weight:600;">Active Closed-Loop Policy Execution</span></td>
+                </tr>
+                <tr>
+                  <td class="triad-label-col">Representative Models</td>
+                  <td>TimesFM, Chronos, Moirai</td>
+                  <td>DreamerV3, DayDreamer, WAM</td>
+                  <td>RT-2, OpenVLA, Octo</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- "Build on This" Step 7 -->
+        <div class="build-on-this-cluster" style="margin-top:36px;">
+          <div class="bot-header">
+            <h4>Build on This: Multi-Agent & Embodied System Integration</h4>
+          </div>
+          <div class="bot-tabs-strip">
+            <button class="bot-tab-btn active" onclick="switchBotTab(this, 'bot-t7')">Causal Intervention vs. Observation</button>
+            <button class="bot-tab-btn" onclick="switchBotTab(this, 'bot-c7')">Unified Interface Code</button>
+            <button class="bot-tab-btn" onclick="switchBotTab(this, 'bot-a7')">Industrial Autonomous Robots</button>
+          </div>
+
+          <div class="bot-content-pane active" id="bot-t7">
+            <p><strong>Pearl's Causal Hierarchy:</strong> TSFM operates at Layer 1 (Seeing: $P(y \mid x)$). WAM operates at Layer 2 (Doing: $P(y \mid do(a), x)$) by allowing counterfactual simulations of hypothetical interventions. VLA closes the loop by optimizing policy $\pi(a \mid x)$ to maximize expected cumulative value $\mathbb{E}[\sum \gamma^t r_t]$. Conflating TSFM with WAM creates catastrophic policy collapse because passive sequence predictors cannot anticipate how external motor actions deform the environment.</p>
+          </div>
+
+          <div class="bot-content-pane" id="bot-c7">
+            <div class="code-mirror-box">
+<span class="code-comment"># Unified System Interface Demarcation</span>
+<span class="code-comment"># 1. TSFM: y_future = tsfm_model(y_history)</span>
+<span class="code-comment"># 2. WAM:  next_state, reward = wam_simulator(current_state, proposed_action)</span>
+<span class="code-comment"># 3. VLA:  robot_action = vla_policy(rgb_camera_frame, "pick up the red block")</span>
+            </div>
+          </div>
+
+          <div class="bot-content-pane" id="bot-a7">
+            <p><strong>Hierarchical Embodied Fleet Deployment:</strong> In modern robotic fulfillment centers, TSFMs monitor warehouse temperature and conveyor vibration for predictive maintenance; WAMs simulate hypothetical routing schedules for hundreds of automated mobile robots (AMRs); and VLAs run inside individual 7-DOF robotic arms to grasp irregular parcels from delivery bins.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="cinema-footer">
+      <div>
+        <div style="font-family:var(--serif); font-size:22px; color:#FFFFFF; font-weight:700;">Kairos Research Lab</div>
+        <div style="font-size:12px; margin-top:4px;">Theoretical Foundation Models, Information States & Dynamical Systems.</div>
+      </div>
+      <div>
+        <a href="#" style="color:var(--cyan); font-weight:600;">Back to Top ↑</a>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ==========================================================================
+       CANVAS SIMULATIONS & INTERACTIVE STATE ENGINE (VANILLA JS / NO LIBS)
+       ========================================================================== */
+  <script>
+    // Global Simulation State
+    const simState = {
+      // Hidden world physics
+      rho: 28.0,
+      sigma: 10.0,
+      beta: 8.0 / 3.0,
+      s: [0.1, 1.0, 1.05], // Initial 3D state
+      history3D: [],
+      maxHistory3D: 450,
+      isPaused: false,
+
+      // Sensor Mechanism
+      sensorAngle: 30 * Math.PI / 180,
+      sensorNoise: 0.4,
+      scalarHistory: [],
+      maxScalarPoints: 128,
+
+      // Delay Embedding
+      lookback: 64,
+      delayLag: 4,
+
+      // Forecasting
+      horizon: 32,
+      showUncertainty: true,
+
+      // Observability
+      coverage: 0.85,
+
+      // Triad view
+      triadMode: 'tsfm'
+    };
+
+    // Numerical RK4 Integrator
+    function rk4Derivatives(s, rho) {
+      const x = s[0], y = s[1], z = s[2];
+      const dx = simState.sigma * (y - x);
+      const dy = x * (rho - z) - y;
+      const dz = x * y - simState.beta * z;
+      return [dx, dy, dz];
+    }
+
+    function stepPhysics(dt = 0.012) {
+      if (simState.isPaused) return;
+
+      const s = simState.s;
+      const rho = simState.rho;
+
+      const k1 = rk4Derivatives(s, rho);
+      const s_k2 = [s[0] + 0.5 * dt * k1[0], s[1] + 0.5 * dt * k1[1], s[2] + 0.5 * dt * k1[2]];
+      const k2 = rk4Derivatives(s_k2, rho);
+      const s_k3 = [s[0] + 0.5 * dt * k2[0], s[1] + 0.5 * dt * k2[1], s[2] + 0.5 * dt * k2[2]];
+      const k3 = rk4Derivatives(s_k3, rho);
+      const s_k4 = [s[0] + dt * k3[0], s[1] + dt * k3[1], s[2] + dt * k3[2]];
+      const k4 = rk4Derivatives(s_k4, rho);
+
+      simState.s[0] += (dt / 6.0) * (k1[0] + 2 * k2[0] + 2 * k3[0] + k4[0]);
+      simState.s[1] += (dt / 6.0) * (k1[1] + 2 * k2[1] + 2 * k3[1] + k4[1]);
+      simState.s[2] += (dt / 6.0) * (k1[2] + 2 * k2[2] + 2 * k3[2] + k4[2]);
+
+      // Push to 3D trajectory trail
+      simState.history3D.push([...simState.s]);
+      if (simState.history3D.length > simState.maxHistory3D) {
+        simState.history3D.shift();
+      }
+
+      // Compute scalar sensor projection: y_t = C(θ) * s_t + noise
+      const cosA = Math.cos(simState.sensorAngle);
+      const sinA = Math.sin(simState.sensorAngle);
+      const cleanMeasurement = cosA * simState.s[0] + sinA * simState.s[1];
+      const noise = (Math.random() - 0.5) * 2 * simState.sensorNoise * 2.0;
+      const y_t = cleanMeasurement + noise;
+
+      simState.scalarHistory.push(y_t);
+      if (simState.scalarHistory.length > simState.maxScalarPoints) {
+        simState.scalarHistory.shift();
+      }
+    }
+
+    // -------------------------------------------------------------
+    // CANVAS 1: HIDDEN WORLD (3D LORENZ ATTRACTOR)
+    // -------------------------------------------------------------
+    const canvas1 = document.getElementById('hiddenWorldCanvas');
+    const ctx1 = canvas1.getContext('2d');
+
+    function renderHiddenWorld() {
+      const w = canvas1.width = canvas1.parentElement.clientWidth;
+      const h = canvas1.height = canvas1.parentElement.clientHeight;
+
+      ctx1.fillStyle = '#090D17';
+      ctx1.fillRect(0, 0, w, h);
+
+      // Grid background
+      ctx1.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+      ctx1.lineWidth = 1;
+      const step = 40;
+      for (let x = 0; x < w; x += step) {
+        ctx1.beginPath(); ctx1.moveTo(x, 0); ctx1.lineTo(x, h); ctx1.stroke();
+      }
+      for (let y = 0; y < h; y += step) {
+        ctx1.beginPath(); ctx1.moveTo(0, y); ctx1.lineTo(w, y); ctx1.stroke();
+      }
+
+      const cx = w / 2;
+      const cy = h / 2 + 30;
+      const scale = Math.min(w, h) / 60;
+
+      // Draw trajectory trail
+      if (simState.history3D.length > 1) {
+        for (let i = 1; i < simState.history3D.length; i++) {
+          const pt0 = simState.history3D[i - 1];
+          const pt1 = simState.history3D[i];
+          const alpha = i / simState.history3D.length;
+
+          // 3D projection onto 2D canvas with isometric tilt
+          const x0 = cx + (pt0[0] - pt0[1]) * 0.707 * scale;
+          const y0 = cy - (pt0[2] - 25) * scale + (pt0[0] + pt0[1]) * 0.3 * scale;
+          const x1 = cx + (pt1[0] - pt1[1]) * 0.707 * scale;
+          const y1 = cy - (pt1[2] - 25) * scale + (pt1[0] + pt1[1]) * 0.3 * scale;
+
+          ctx1.strokeStyle = `rgba(0, 242, 254, ${alpha * 0.8})`;
+          ctx1.lineWidth = 1.2 + alpha * 1.5;
+          ctx1.beginPath();
+          ctx1.moveTo(x0, y0);
+          ctx1.lineTo(x1, y1);
+          ctx1.stroke();
+        }
+
+        // Current head
+        const head = simState.history3D[simState.history3D.length - 1];
+        const hx = cx + (head[0] - head[1]) * 0.707 * scale;
+        const hy = cy - (head[2] - 25) * scale + (head[0] + head[1]) * 0.3 * scale;
+
+        // Glow
+        const grad = ctx1.createRadialGradient(hx, hy, 2, hx, hy, 16);
+        grad.addColorStop(0, '#00F2FE');
+        grad.addColorStop(0.5, 'rgba(0, 242, 254, 0.4)');
+        grad.addColorStop(1, 'transparent');
+        ctx1.fillStyle = grad;
+        ctx1.beginPath(); ctx1.arc(hx, hy, 16, 0, Math.PI * 2); ctx1.fill();
+
+        ctx1.fillStyle = '#FFFFFF';
+        ctx1.beginPath(); ctx1.arc(hx, hy, 3.5, 0, Math.PI * 2); ctx1.fill();
+      }
+
+      // Update telemetry text
+      document.getElementById('stateCoordinates').textContent =
+        `s_t: [x: ${simState.s[0].toFixed(2)}, y: ${simState.s[1].toFixed(2)}, z: ${simState.s[2].toFixed(2)}]`;
+    }
+
+    // -------------------------------------------------------------
+    // CANVAS 2: SENSOR MEASUREMENT STREAM & PROJECTION
+    // -------------------------------------------------------------
+    const canvas2 = document.getElementById('sensorStreamCanvas');
+    const ctx2 = canvas2.getContext('2d');
+
+    function renderSensorStream() {
+      const w = canvas2.width = canvas2.parentElement.clientWidth;
+      const h = canvas2.height = canvas2.parentElement.clientHeight;
+
+      ctx2.fillStyle = '#090D17';
+      ctx2.fillRect(0, 0, w, h);
+
+      // Center reference axis
+      const midY = h / 2;
+      ctx2.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx2.setLineDash([4, 4]);
+      ctx2.beginPath(); ctx2.moveTo(0, midY); ctx2.lineTo(w, midY); ctx2.stroke();
+      ctx2.setLineDash([]);
+
+      const pts = simState.scalarHistory;
+      if (pts.length > 1) {
+        const stepX = w / simState.maxScalarPoints;
+        const scaleY = h / 70;
+
+        ctx2.strokeStyle = '#FF9F1C';
+        ctx2.lineWidth = 2;
+        ctx2.beginPath();
+
+        for (let i = 0; i < pts.length; i++) {
+          const x = i * stepX;
+          const y = midY - pts[i] * scaleY;
+          if (i === 0) ctx2.moveTo(x, y);
+          else ctx2.lineTo(x, y);
+        }
+        ctx2.stroke();
+
+        // Observation sampling dots
+        for (let i = 0; i < pts.length; i += 4) {
+          const x = i * stepX;
+          const y = midY - pts[i] * scaleY;
+          ctx2.fillStyle = 'rgba(255, 159, 28, 0.6)';
+          ctx2.beginPath(); ctx2.arc(x, y, 2.5, 0, Math.PI * 2); ctx2.fill();
+        }
+
+        const lastVal = pts[pts.length - 1];
+        const snr = (Math.abs(lastVal) / (simState.sensorNoise + 0.01) * 6).toFixed(1);
+        document.getElementById('sensorReadout').textContent =
+          `Reading: ${lastVal >= 0 ? '+' : ''}${lastVal.toFixed(2)} | SNR: ${snr} dB`;
+      }
+    }
+
+    // -------------------------------------------------------------
+    // CANVAS 3: TAKENS' DELAY RECONSTRUCTION (INFORMATION STATE)
+    // -------------------------------------------------------------
+    const canvas3 = document.getElementById('takensReconstructionCanvas');
+    const ctx3 = canvas3.getContext('2d');
+
+    function renderTakensReconstruction() {
+      const w = canvas3.width = canvas3.parentElement.clientWidth;
+      const h = canvas3.height = canvas3.parentElement.clientHeight;
+
+      ctx3.fillStyle = '#090D17';
+      ctx3.fillRect(0, 0, w, h);
+
+      const pts = simState.scalarHistory;
+      const tau = simState.delayLag;
+      const cx = w / 2;
+      const cy = h / 2;
+      const scale = Math.min(w, h) / 70;
+
+      if (pts.length > 2 * tau + 5) {
+        ctx3.strokeStyle = 'rgba(16, 185, 129, 0.7)';
+        ctx3.lineWidth = 1.8;
+        ctx3.beginPath();
+
+        let started = false;
+        for (let i = 2 * tau; i < pts.length; i++) {
+          const v0 = pts[i];
+          const v1 = pts[i - tau];
+          const v2 = pts[i - 2 * tau];
+
+          // 3D Delay vector [y(t), y(t-τ), y(t-2τ)] projected onto 2D
+          const px = cx + (v0 - v1) * 0.707 * scale * 1.3;
+          const py = cy - (v2) * scale * 1.3 + (v0 + v1) * 0.3 * scale * 0.8;
+
+          if (!started) { ctx3.moveTo(px, py); started = true; }
+          else { ctx3.lineTo(px, py); }
+        }
+        ctx3.stroke();
+
+        // Current Delay Head
+        const lastIdx = pts.length - 1;
+        const h0 = pts[lastIdx];
+        const h1 = pts[lastIdx - tau];
+        const h2 = pts[lastIdx - 2 * tau];
+        const hx = cx + (h0 - h1) * 0.707 * scale * 1.3;
+        const hy = cy - (h2) * scale * 1.3 + (h0 + h1) * 0.3 * scale * 0.8;
+
+        ctx3.fillStyle = '#10B981';
+        ctx3.beginPath(); ctx3.arc(hx, hy, 4, 0, Math.PI * 2); ctx3.fill();
+
+        document.getElementById('takensCoord').textContent =
+          `Delay: [${h0.toFixed(1)}, ${h1.toFixed(1)}, ${h2.toFixed(1)}]`;
+      }
+    }
+
+    // -------------------------------------------------------------
+    // CANVAS 4: PREDICTIVE ROLLOUT & UNCERTAINTY CONE
+    // -------------------------------------------------------------
+    const canvas4 = document.getElementById('predictionCanvas');
+    const ctx4 = canvas4.getContext('2d');
+
+    function renderPredictionRollout() {
+      const w = canvas4.width = canvas4.parentElement.clientWidth;
+      const h = canvas4.height = canvas4.parentElement.clientHeight;
+
+      ctx4.fillStyle = '#090D17';
+      ctx4.fillRect(0, 0, w, h);
+
+      const midY = h / 2;
+      const pts = simState.scalarHistory;
+      if (pts.length < 20) return;
+
+      const obsCount = Math.floor(pts.length * 0.65);
+      const splitX = w * 0.65;
+      const stepX_obs = splitX / obsCount;
+      const scaleY = h / 70;
+
+      // Vertical Split line: "Present Day t"
+      ctx4.strokeStyle = 'rgba(0, 242, 254, 0.4)';
+      ctx4.setLineDash([5, 5]);
+      ctx4.beginPath(); ctx4.moveTo(splitX, 0); ctx4.lineTo(splitX, h); ctx4.stroke();
+      ctx4.setLineDash([]);
+
+      ctx4.fillStyle = 'rgba(0, 242, 254, 0.8)';
+      ctx4.font = '11px Roboto Mono';
+      ctx4.fillText('Present t (Observation Boundary)', splitX - 180, 22);
+
+      // Draw historical observations
+      ctx4.strokeStyle = '#00F2FE';
+      ctx4.lineWidth = 2;
+      ctx4.beginPath();
+      for (let i = 0; i < obsCount; i++) {
+        const x = i * stepX_obs;
+        const y = midY - pts[i] * scaleY;
+        if (i === 0) ctx4.moveTo(x, y);
+        else ctx4.lineTo(x, y);
+      }
+      ctx4.stroke();
+
+      // Forecast rollout from splitX to w
+      const horizonSteps = simState.horizon;
+      const stepX_fore = (w - splitX) / horizonSteps;
+      const lastVal = pts[obsCount - 1];
+
+      // Simulated forecasted trajectory using damped synthetic attractor dynamics
+      const forecastPts = [];
+      let curVal = lastVal;
+      let trend = (pts[obsCount - 1] - pts[obsCount - 4]) / 3;
+
+      for (let step = 0; step < horizonSteps; step++) {
+        trend = trend * 0.94 - curVal * 0.05 + Math.sin(step * 0.3) * 0.8;
+        curVal += trend;
+        forecastPts.push(curVal);
+      }
+
+      // Draw uncertainty cone (P10 - P90)
+      if (simState.showUncertainty) {
+        ctx4.fillStyle = 'rgba(255, 51, 102, 0.15)';
+        ctx4.beginPath();
+
+        // Upper envelope P90
+        for (let i = 0; i < horizonSteps; i++) {
+          const x = splitX + i * stepX_fore;
+          const spread = Math.pow(i / horizonSteps, 1.3) * 26; // Lyapunov exponential growth
+          const yUpper = midY - (forecastPts[i] + spread) * scaleY;
+          if (i === 0) ctx4.moveTo(x, yUpper);
+          else ctx4.lineTo(x, yUpper);
+        }
+
+        // Lower envelope P10
+        for (let i = horizonSteps - 1; i >= 0; i--) {
+          const x = splitX + i * stepX_fore;
+          const spread = Math.pow(i / horizonSteps, 1.3) * 26;
+          const yLower = midY - (forecastPts[i] - spread) * scaleY;
+          ctx4.lineTo(x, yLower);
+        }
+
+        ctx4.closePath();
+        ctx4.fill();
+      }
+
+      // Median Prediction Line (P50)
+      ctx4.strokeStyle = '#FF3366';
+      ctx4.lineWidth = 2.5;
+      ctx4.beginPath();
+      ctx4.moveTo(splitX, midY - lastVal * scaleY);
+      for (let i = 0; i < horizonSteps; i++) {
+        const x = splitX + i * stepX_fore;
+        const y = midY - forecastPts[i] * scaleY;
+        ctx4.lineTo(x, y);
+      }
+      ctx4.stroke();
+    }
+
+    // -------------------------------------------------------------
+    // CANVAS 5: FISHER INFORMATION & OBSERVABILITY ELLIPSOID
+    // -------------------------------------------------------------
+    const canvas5 = document.getElementById('observabilityCanvas');
+    const ctx5 = canvas5.getContext('2d');
+    let ellipsoidRot = 0;
+
+    function renderObservabilityEllipsoid() {
+      const w = canvas5.width = canvas5.parentElement.clientWidth;
+      const h = canvas5.height = canvas5.parentElement.clientHeight;
+
+      ctx5.fillStyle = '#090D17';
+      ctx5.fillRect(0, 0, w, h);
+
+      const cx = w / 2;
+      const cy = h / 2;
+      ellipsoidRot += 0.008;
+
+      const cov = simState.coverage;
+      const rX = 110 * cov;
+      const rY = 65;
+      const rZ = 45 * Math.max(cov, 0.08);
+
+      // Render 3D Wireframe Ellipsoid
+      ctx5.save();
+      ctx5.translate(cx, cy);
+
+      const rings = 12;
+      for (let i = 0; i < rings; i++) {
+        const theta = (i / rings) * Math.PI;
+        const curRadius = rX * Math.sin(theta);
+        const yOffset = rY * Math.cos(theta);
+
+        ctx5.strokeStyle = cov > 0.4 ? 'rgba(0, 242, 254, 0.25)' : 'rgba(255, 51, 102, 0.3)';
+        ctx5.lineWidth = 1;
+        ctx5.beginPath();
+
+        const segments = 24;
+        for (let j = 0; j <= segments; j++) {
+          const phi = (j / segments) * Math.PI * 2 + ellipsoidRot;
+          const x = curRadius * Math.cos(phi);
+          const z = curRadius * Math.sin(phi) * (rZ / rX);
+          // Isometric projection
+          const px = x;
+          const py = yOffset + z * 0.4;
+          if (j === 0) ctx5.moveTo(px, py);
+          else ctx5.lineTo(px, py);
+        }
+        ctx5.stroke();
+      }
+
+      ctx5.restore();
+
+      // Update condition number display
+      const cond = (1 / Math.max(cov, 0.04)).toFixed(2);
+      const condElem = document.getElementById('condNumberDisp');
+      const rankElem = document.getElementById('gramianRank');
+
+      if (cov < 0.2) {
+        condElem.textContent = `${cond} (Near Singular!)`;
+        condElem.className = 'metric-hero-val crimson';
+        rankElem.textContent = 'Rank(O) = 2 (Blind Spot!)';
+      } else {
+        condElem.textContent = `${cond} (Well-Conditioned)`;
+        condElem.className = 'metric-hero-val cyan';
+        rankElem.textContent = 'Rank(O) = 3 (Full Observability)';
+      }
+    }
+
+    // -------------------------------------------------------------
+    // ANIMATION MASTER LOOP
+    // -------------------------------------------------------------
+    function animationLoop() {
+      stepPhysics();
+      renderHiddenWorld();
+      renderSensorStream();
+      renderTakensReconstruction();
+      renderPredictionRollout();
+      renderObservabilityEllipsoid();
+      requestAnimationFrame(animationLoop);
+    }
+
+    // -------------------------------------------------------------
+    // CONTROLS & INTERACTIVE EVENT HANDLERS
+    // -------------------------------------------------------------
+    function updateStability(val) {
+      simState.rho = +val;
+      document.getElementById('stabilityVal').textContent = (+val).toFixed(1);
+      const regime = document.getElementById('regimeIndicator');
+      const lyap = document.getElementById('lyapunovDisp');
+
+      if (val < 1.0) {
+        regime.textContent = "Stable Origin (Equilibrium)";
+        regime.className = "metric-hero-val emerald";
+        lyap.textContent = "λ₁ = -1.00 (Decaying)";
+        lyap.className = "metric-hero-val emerald";
+      } else if (val < 24.74) {
+        regime.textContent = "Pitchfork Fixed Points";
+        regime.className = "metric-hero-val amber";
+        lyap.textContent = "λ₁ = -0.05 (Converging)";
+        lyap.className = "metric-hero-val amber";
+      } else {
+        regime.textContent = "Chaotic Attractor (Strange)";
+        regime.className = "metric-hero-val crimson";
+        lyap.textContent = "λ₁ = +0.905 (Exponential Divergence)";
+        lyap.className = "metric-hero-val crimson";
+      }
+    }
+
+    function toggleWorldPause() {
+      simState.isPaused = !simState.isPaused;
+      const btn = document.getElementById('worldPauseBtn');
+      btn.innerHTML = simState.isPaused ? "<span>▶</span> Resume World" : "<span>⏸</span> Pause World";
+    }
+
+    function resetWorldSim() {
+      simState.s = [0.1 + (Math.random() - 0.5) * 0.1, 1.0, 1.05];
+      simState.history3D = [];
+      simState.scalarHistory = [];
+    }
+
+    function updateSensorAngle(deg) {
+      simState.sensorAngle = +deg * Math.PI / 180;
+      document.getElementById('sensorAngleVal').textContent = deg + "°";
+    }
+
+    function updateSensorNoise(noise) {
+      simState.sensorNoise = +noise;
+      document.getElementById('sensorNoiseVal').textContent = (+noise).toFixed(1);
+    }
+
+    function updateLookback(L) {
+      simState.lookback = +L;
+      document.getElementById('lookbackVal').textContent = L;
+    }
+
+    function updateDelayLag(tau) {
+      simState.delayLag = +tau;
+      document.getElementById('delayLagVal').textContent = tau;
+    }
+
+    function updateHorizon(h) {
+      simState.horizon = +h;
+      document.getElementById('horizonVal').textContent = h;
+    }
+
+    function toggleUncertaintyCone() {
+      simState.showUncertainty = !simState.showUncertainty;
+      document.getElementById('uncertaintyToggleBtn').textContent =
+        simState.showUncertainty ? "Hide Uncertainty Cone" : "Show Uncertainty Cone";
+    }
+
+    function updateCoverage(cov) {
+      simState.coverage = +cov;
+      document.getElementById('coverageVal').textContent = Math.round(cov * 100) + "%";
+    }
+
+    // Build on this tabs switcher
+    function switchBotTab(btn, paneId) {
+      const cluster = btn.closest('.build-on-this-cluster');
+      cluster.querySelectorAll('.bot-tab-btn').forEach(b => b.classList.remove('active'));
+      cluster.querySelectorAll('.bot-content-pane').forEach(p => p.classList.remove('active'));
+
+      btn.classList.add('active');
+      const pane = document.getElementById(paneId);
+      if (pane) pane.classList.add('active');
+    }
+
+    // Grand Triad Interactive Diagram Renderer
+    const triadConfigs = {
+      tsfm: {
+        title: "1. Time-Series Foundation Model (TSFM)",
+        desc: "A purely observational temporal predictor. Takes 1D/multivariate sensor streams $y_{1:t}$, compresses history into an approximate information state $\\sigma_t$, and decodes the multi-step future distribution $p_\\theta(y_{t+1:t+H} \\mid \\sigma_t)$ without taking actions or intervening in the physical world.",
+        formula: "p_\\theta(y_{t+1:t+H} \\mid y_{1:t}) \\quad [\\text{Observational / Passive Sequence Model}]",
+        color: "#00F2FE",
+        activePill: "tsfm"
+      },
+      wam: {
+        title: "2. World Action Model (WAM)",
+        desc: "An action-conditioned generative simulator. Takes the current state $\\sigma_t$ AND a proposed action $a_t$ to rollout the counterfactual next physical state $\\sigma_{t+1} \\sim \\mathcal{T}(\\sigma_t, a_t)$ and expected reward $\\hat{r}_t$. Used for planning, Model Predictive Control (MPC), and model-based RL.",
+        formula: "\\sigma_{t+1} = \\mathcal{W}(\\sigma_t, a_t) + w_t, \\quad \\hat{r}_t = R(\\sigma_t, a_t) \\quad [\\text{Interventional Simulator}]",
+        color: "#FF9F1C",
+        activePill: "wam"
+      },
+      vla: {
+        title: "3. Vision-Language-Action (VLA)",
+        desc: "An embodied closed-loop robotic policy. Directly conditions on high-dimensional visual video frames $I_t$, natural language task instructions $\\mathcal{L}$, and robot proprioception to predict low-level continuous motor control torques $a_t \\sim \\pi(\\cdot \\mid I_t, \\mathcal{L})$.",
+        formula: "a_t \\sim \\pi_\\theta(a_t \\mid I_t, \\mathcal{L}, \\text{proprio}_t) \\quad [\\text{Embodied Visuomotor Policy}]",
+        color: "#FF3366",
+        activePill: "vla"
+      }
+    };
+
+    function renderTriadSvg(activeKey = 'tsfm') {
+      const svg = document.getElementById('triadSvg');
+      svg.innerHTML = `
+        <defs>
+          <linearGradient id="gradTSFM" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#00F2FE" stop-opacity="0.25"/>
+            <stop offset="100%" stop-color="#0E131F" stop-opacity="0.9"/>
+          </linearGradient>
+          <linearGradient id="gradWAM" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#FF9F1C" stop-opacity="0.25"/>
+            <stop offset="100%" stop-color="#0E131F" stop-opacity="0.9"/>
+          </linearGradient>
+          <linearGradient id="gradVLA" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#FF3366" stop-opacity="0.25"/>
+            <stop offset="100%" stop-color="#0E131F" stop-opacity="0.9"/>
+          </linearGradient>
+          <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="6" result="blur"/>
+            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+          </filter>
+        </defs>
+
+        <!-- Connecting Dataflow Buses -->
+        <path d="M 280 170 L 380 170" stroke="#00F2FE" stroke-width="2.5" stroke-dasharray="6,4" opacity="0.6"/>
+        <path d="M 620 170 L 720 170" stroke="#FF9F1C" stroke-width="2.5" stroke-dasharray="6,4" opacity="0.6"/>
+        <path d="M 500 240 L 500 280 L 160 280 L 160 240" stroke="#FF3366" stroke-width="2" stroke-dasharray="5,5" fill="none" opacity="0.4"/>
+
+        <!-- Flow Text Labels -->
+        <text x="330" y="155" fill="#94A3B8" font-size="11" font-family="Roboto Mono" text-anchor="middle">y_{1:t} Sensor Stream</text>
+        <text x="670" y="155" fill="#94A3B8" font-size="11" font-family="Roboto Mono" text-anchor="middle">Hypothetical a_t</text>
+        <text x="330" y="295" fill="#FF3366" font-size="11" font-family="Roboto Mono" text-anchor="middle">Closed-Loop Robot Action Feedback a_t ~ π(·)</text>
+
+        <!-- NODE 1: TSFM -->
+        <g class="triad-svg-node" onclick="selectTriadMode('tsfm')" style="cursor:pointer;">
+          <rect x="40" y="80" width="240" height="150" rx="14"
+            fill="url(#gradTSFM)"
+            stroke="${activeKey === 'tsfm' ? '#00F2FE' : 'rgba(0, 242, 254, 0.3)'}"
+            stroke-width="${activeKey === 'tsfm' ? '3' : '1.5'}"
+            filter="${activeKey === 'tsfm' ? 'url(#neonGlow)' : 'none'}"/>
+          <text x="160" y="115" fill="#00F2FE" font-size="15" font-weight="700" font-family="Inter" text-anchor="middle">TSFM</text>
+          <text x="160" y="135" fill="#FFFFFF" font-size="12" font-family="Inter" text-anchor="middle">Time-Series Foundation Model</text>
+          <text x="160" y="165" fill="#94A3B8" font-size="11" font-family="Roboto Mono" text-anchor="middle">p_θ(y_{t+1:H} | y_{1:t})</text>
+          <text x="160" y="195" fill="#00F2FE" font-size="10.5" font-family="Roboto Mono" font-weight="600" text-anchor="middle">[PASSIVE OBSERVER]</text>
+        </g>
+
+        <!-- NODE 2: WAM -->
+        <g class="triad-svg-node" onclick="selectTriadMode('wam')" style="cursor:pointer;">
+          <rect x="380" y="80" width="240" height="150" rx="14"
+            fill="url(#gradWAM)"
+            stroke="${activeKey === 'wam' ? '#FF9F1C' : 'rgba(255, 159, 28, 0.3)'}"
+            stroke-width="${activeKey === 'wam' ? '3' : '1.5'}"
+            filter="${activeKey === 'wam' ? 'url(#neonGlow)' : 'none'}"/>
+          <text x="500" y="115" fill="#FF9F1C" font-size="15" font-weight="700" font-family="Inter" text-anchor="middle">WAM</text>
+          <text x="500" y="135" fill="#FFFFFF" font-size="12" font-family="Inter" text-anchor="middle">World Action Model</text>
+          <text x="500" y="165" fill="#94A3B8" font-size="11" font-family="Roboto Mono" text-anchor="middle">σ_{t+1} = W(σ_t, a_t)</text>
+          <text x="500" y="195" fill="#FF9F1C" font-size="10.5" font-family="Roboto Mono" font-weight="600" text-anchor="middle">[INTERVENTIONAL SIMULATOR]</text>
+        </g>
+
+        <!-- NODE 3: VLA -->
+        <g class="triad-svg-node" onclick="selectTriadMode('vla')" style="cursor:pointer;">
+          <rect x="720" y="80" width="240" height="150" rx="14"
+            fill="url(#gradVLA)"
+            stroke="${activeKey === 'vla' ? '#FF3366' : 'rgba(255, 51, 102, 0.3)'}"
+            stroke-width="${activeKey === 'vla' ? '3' : '1.5'}"
+            filter="${activeKey === 'vla' ? 'url(#neonGlow)' : 'none'}"/>
+          <text x="840" y="115" fill="#FF3366" font-size="15" font-weight="700" font-family="Inter" text-anchor="middle">VLA</text>
+          <text x="840" y="135" fill="#FFFFFF" font-size="12" font-family="Inter" text-anchor="middle">Vision-Language-Action</text>
+          <text x="840" y="165" fill="#94A3B8" font-size="11" font-family="Roboto Mono" text-anchor="middle">a_t ~ π_θ(· | I_t, L)</text>
+          <text x="840" y="195" fill="#FF3366" font-size="10.5" font-family="Roboto Mono" font-weight="600" text-anchor="middle">[EMBODIED POLICY ACTOR]</text>
+        </g>
+      `;
+    }
+
+    function selectTriadMode(modeKey, btn) {
+      simState.triadMode = modeKey;
+      const conf = triadConfigs[modeKey];
+
+      // Update pills
+      document.querySelectorAll('.triad-pill-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      else {
+        const found = document.querySelector(`.triad-pill-btn.${modeKey}`);
+        if (found) found.classList.add('active');
+      }
+
+      // Update explainer
+      const titleElem = document.getElementById('triadModeTitle');
+      titleElem.textContent = conf.title;
+      titleElem.style.color = conf.color;
+
+      document.getElementById('triadModeDesc').innerHTML = conf.desc;
+      document.getElementById('triadFormulaRow').innerHTML =
+        `<span style="font-family:var(--mono); color:${conf.color}; font-size:16px;">Mathematical Formulation: ${conf.formula}</span>`;
+
+      renderTriadSvg(modeKey);
+    }
+
+    // Initialize Everything on Window Load
+    window.addEventListener('load', () => {
+      renderTriadSvg('tsfm');
+      requestAnimationFrame(animationLoop);
+    });
+  </script>
+</body>
+</html>
