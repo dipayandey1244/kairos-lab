@@ -39,3 +39,13 @@ The Time Series Foundation Models page includes a step-by-step path from statist
 ## Design language
 
 Warm paper background, deep navy typography, restrained crimson accents, Cormorant Garamond display type and Inter UI type. The generated hero visual is stored under `assets/hero.jpg`.
+
+
+## AI Engineering Academy
+
+The Academy is a staged, research-backed learning workspace for LLM systems, PyTorch, agents, orchestration, evaluation engineering and reproducible AI research.
+
+- **Open the Academy:** [AI Engineering Academy](./ai-engineering/)
+- **Implementation roadmap:** [AI Engineering Academy plan](./docs/AI_ENGINEERING_ACADEMY_PLAN.md)
+
+The first milestone delivers Module 0: four lessons covering AI engineering roles, the AI product lifecycle, model/application/agent/orchestrator boundaries, and a practical diagnostic architecture lab. Lesson progress and reading marks are stored locally in the browser. Later modules are explicitly labeled as planned until their full lessons are implemented.
